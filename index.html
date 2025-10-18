@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>BoxFit | Elite</title>
     
-    <link rel="manifest" href="manifest.json">
-    <link rel="apple-touch-icon" href="glove-192.png">
+    <link rel="manifest" href="./manifest.json">
+    <link rel="apple-touch-icon" href="./glove-192.png">
     <meta name="theme-color" content="#E53E3E">
 
     <script src="https://cdn.tailwindcss.com"></script>
@@ -93,14 +93,16 @@
         .toggle-label {
             transition: background-color 0.2s ease-in-out;
         }
+        /* Styles the background track color when checked (Input + Label) */
         .toggle-checkbox:checked + .toggle-label {
             background-color: var(--primary-color);
         }
+        /* Styles the thumb/circle movement when checked (Input itself) */
         .toggle-checkbox {
             transition: transform 0.2s ease-in-out;
         }
         .toggle-checkbox:checked {
-            transform: translateX(20px); /* Fixed positioning */
+            transform: translateX(20px); 
         }
         
         /* Specifics */
@@ -331,7 +333,56 @@
                 
                 <div id="profile-screen" class="screen p-6">
                     <h2 class="font-anton text-3xl mb-6">Settings</h2>
-                    <div id="profile-summary" class="space-y-3 glass-card p-4"></div>
+                    
+                    <div class="glass-card p-4 space-y-4">
+                        <h3 class="font-anton text-xl mb-3">Profile Details</h3>
+                        <div>
+                            <label class="font-bold text-sm text-text-color-dark mb-1 block">Name</label>
+                            <input type="text" id="profile-name-input" class="w-full">
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="font-bold text-sm text-text-color-dark mb-1 block">Fitness Level</label>
+                                <select id="profile-level-select" class="w-full">
+                                    <option value="beginner">Beginner</option>
+                                    <option value="intermediate">Intermediate</option>
+                                    <option value="advanced">Advanced</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="font-bold text-sm text-text-color-dark mb-1 block">Primary Goal</label>
+                                <select id="profile-goal-select" class="w-full">
+                                    <option value="technique">Technique</option>
+                                    <option value="cardio">Cardio</option>
+                                    <option value="strength">Strength</option>
+                                    <option value="weight_loss">Weight Loss</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <label class="font-bold text-sm text-text-color-dark mb-1 block pt-2">Equipment</label>
+                        <div id="profile-equipment-choices" class="grid grid-cols-2 gap-4 text-center">
+                            <div class="choice-card glass-card p-4 cursor-pointer border-2 border-transparent flex flex-col items-center justify-center gap-2" data-value="none">
+                                <i class="fas fa-running text-3xl"></i>
+                                <span class="font-semibold">Bodyweight</span>
+                            </div>
+                            <div class="choice-card glass-card p-4 cursor-pointer border-2 border-transparent flex flex-col items-center justify-center gap-2" data-value="heavy_bag">
+                                <i class="fas fa-sack-xmark text-3xl"></i>
+                                <span class="font-semibold">Heavy Bag</span>
+                            </div>
+                            <div class="choice-card glass-card p-4 cursor-pointer border-2 border-transparent flex flex-col items-center justify-center gap-2" data-value="dumbbells">
+                                <i class="fas fa-dumbbell text-3xl"></i>
+                                <span class="font-semibold">Dumbbells</span>
+                            </div>
+                            <div class="choice-card glass-card p-4 cursor-pointer border-2 border-transparent flex flex-col items-center justify-center gap-2" data-value="jump_rope">
+                                <i class="fas fa-infinity text-3xl"></i>
+                                <span class="font-semibold">Jump Rope</span>
+                            </div>
+                        </div>
+
+                        <button id="update-profile-btn" class="btn btn-primary w-full mt-4">Update Profile</button>
+                    </div>
                     <div class="glass-card p-4 mt-6 flex justify-between items-center">
                         <label for="voice-toggle" class="font-bold text-lg">Voice Cues</label>
                         <div class="relative inline-block w-12 align-middle select-none">
@@ -401,7 +452,7 @@
         advanced: [
             { id: 301, title: 'Counter Punching', goal: 'technique', duration: 30, calories: 400, equipment: ['heavy_bag'], rounds: [{type: 'work', text: 'Slip & Rip', time: 180}, {type: 'rest', time: 45}, {type: 'work', text: 'Pull Counter', time: 180}, {type: 'rest', time: 45}, {type: 'work', text: 'Angle & Attack', time: 180}, {type: 'rest', time: 45}, {type: 'work', text: 'Freestyle Counters', time: 180}] },
             { id: 302, title: 'Championship Rounds', goal: 'cardio', duration: 35, calories: 500, equipment: ['heavy_bag', 'jump_rope'], rounds: [{type: 'work', text: 'Rope Warmup', time: 180}, {type: 'rest', time: 60}, {type: 'work', text: 'High-Pace Bag Work', time: 180}, {type: 'rest', time: 60}, {type: 'work', text: 'Footwork & Speed', time: 180}, {type: 'rest', time: 60}, {type: 'work', text: 'High-Pace Bag Work', time: 180}, {type: 'rest', time: 60}, {type: 'work', text: 'Burnout Round', time: 180}] },
-            { id: 303, title: 'Explosive Power', goal: 'strength', duration: 25, calories: 380, equipment: ['dumbbells', 'heavy_bag'], rounds: [{type: 'work', text: 'Plyo Pushups', time: 180}, {type: 'rest', time: 60}, {type: 'work', text: 'Max Power Bag Combos', time: 180}, {type: 'rest', time: 60}, {type: 'work', text: 'Dumbbell Snatches', time: 180}, {type: 'rest', time: 60}, {type: 'work', text: 'Max Power Bag Combos', time: 180}] },
+            { id: 303, title: 'Explosive Power', goal: 'strength', duration: 30, calories: 380, equipment: ['dumbbells', 'heavy_bag'], rounds: [{type: 'work', text: 'Plyo Pushups', time: 180}, {type: 'rest', time: 60}, {type: 'work', text: 'Max Power Bag Combos', time: 180}, {type: 'rest', time: 60}, {type: 'work', text: 'Dumbbell Snatches', time: 180}, {type: 'rest', time: 60}, {type: 'work', text: 'Max Power Bag Combos', time: 180}] },
             { id: 304, title: 'The Shredder', goal: 'weight_loss', duration: 30, calories: 550, equipment: ['none', 'jump_rope', 'heavy_bag'], rounds: [{type: 'work', text: 'Rope HIIT', time: 180}, {type: 'rest', time: 30}, {type: 'work', text: 'Burpee Bag Slams', time: 180}, {type: 'rest', time: 30}, {type: 'work', text: 'Rope HIIT', time: 180}, {type: 'rest', time: 30}, {type: 'work', text: 'Burpee Bag Slams', time: 180}]},
             { id: 305, title: 'Pivots & Switches', goal: 'technique', duration: 35, calories: 350, equipment: ['none'], rounds: [{type: 'work', text: 'Front Foot Pivots', time: 180}, {type: 'rest', time: 45}, {type: 'work', text: 'Back Foot Pivots', time: 180}, {type: 'rest', time: 45}, {type: 'work', text: 'Switch Step Attack', time: 180}, {type: 'rest', time: 45}, {type: 'work', text: 'Off-Angle Counters', time: 180}] },
             { id: 306, title: '5-Minute Grind', goal: 'cardio', duration: 30, calories: 600, equipment: ['heavy_bag'], rounds: [{type: 'work', text: '5-Minute High Volume', time: 300}, {type: 'rest', time: 60}, {type: 'work', text: '5-Minute High Volume', time: 300}, {type: 'rest', time: 60}, {type: 'work', text: '5-Minute High Volume', time: 300}] },
@@ -476,6 +527,18 @@
 
     // --- SPEECH & SOUND ---
     const speechSynth = window.speechSynthesis;
+    
+    // New function to resume audio after suspension (Crucial for mobile)
+    const resumeAudioContext = () => {
+        if (Tone.context.state === 'suspended') {
+            Tone.context.resume().then(() => {
+                console.log("Audio context resumed on user interaction.");
+            });
+        }
+        // Re-attach the handler for future interactions
+        document.body.addEventListener('click', resumeAudioContext);
+    };
+
     const speak = (text) => {
         if (!state.settings.voiceEnabled || !speechSynth || !soundsReady) return;
         speechSynth.cancel(); 
@@ -674,16 +737,26 @@
             </div>`).join('');
     };
 
+    let selectedEquipmentProfile = []; // New state variable for editing equipment
+
     const renderProfile = () => {
         const { name, level, goal, equipment } = getProfile();
-        getEl('profile-summary').innerHTML = `
-            <div class="flex justify-between"><span class="text-text-color-dark">Name:</span> <strong>${name}</strong></div>
-            <div class="flex justify-between"><span class="text-text-color-dark">Level:</span> <strong class="capitalize">${level}</strong></div>
-            <div class="flex justify-between"><span class="text-text-color-dark">Goal:</span> <strong class="capitalize">${goal.replace('_', ' ')}</strong></div>
-            <div class="flex justify-between"><span class="text-text-color-dark">Equipment:</span> <strong class="capitalize">${equipment.join(', ').replace(/_/g, ' ')}</strong></div>
-        `;
-        // Ensures the toggle switch UI reflects the saved state
+        
+        // 1. Set values in the new input fields
+        getEl('profile-name-input').value = name;
+        getEl('profile-level-select').value = level;
+        getEl('profile-goal-select').value = goal;
+
+        // 2. Set the voice toggle state
         getEl('voice-toggle').checked = !!state.settings.voiceEnabled; 
+
+        // 3. Mark the selected equipment choices
+        selectedEquipmentProfile = equipment; // Load current equipment into local state
+        const profileEquipmentChoices = queryAll('#profile-equipment-choices .choice-card');
+        profileEquipmentChoices.forEach(card => {
+            const isSelected = equipment.includes(card.dataset.value);
+            card.classList.toggle('selected', isSelected);
+        });
     };
 
     // --- INITIALIZATION & PROFILE SETUP ---
@@ -727,12 +800,75 @@
         initAppForUser();
     });
     
+    // --- NEW: PROFILE UPDATE LOGIC (Updates profile without losing history) ---
+    
+    // Handler for selecting/deselecting equipment on the Profile screen
+    document.body.addEventListener('click', (e) => {
+        const card = e.target.closest('#profile-equipment-choices .choice-card');
+        if (card) {
+            card.classList.toggle('selected');
+            const value = card.dataset.value;
+            // Update the separate state variable used for profile editing
+            if (card.classList.contains('selected')) { 
+                if (!selectedEquipmentProfile.includes(value)) selectedEquipmentProfile.push(value); 
+            } else { 
+                selectedEquipmentProfile = selectedEquipmentProfile.filter(item => item !== value); 
+            }
+        }
+    });
+
+    // Handler for the Update Profile button
+    getEl('update-profile-btn').addEventListener('click', () => {
+        const name = getEl('profile-name-input').value.trim();
+        const level = getEl('profile-level-select').value;
+        const goal = getEl('profile-goal-select').value;
+
+        // Validation
+        if (name === '' || selectedEquipmentProfile.length === 0) {
+            getEl('error-message').textContent = 'Name and at least one piece of equipment are required.';
+            showModal('error-modal'); 
+            return;
+        }
+
+        // Update state and save
+        state.profile.name = name;
+        state.profile.level = level;
+        state.profile.goal = goal;
+        state.profile.equipment = selectedEquipmentProfile;
+        
+        saveState(); 
+
+        // Update dashboard and notify user
+        renderDashboard();
+        showScreen('dashboard-screen');
+        alert('Profile Updated Successfully!');
+    });
+
+    // --- END NEW PROFILE UPDATE LOGIC ---
+
+
     // --- WORKOUT PLAYER LOGIC ---
     let currentWorkout, currentRoundIndex, secondsRemaining;
 
     const startWorkout = (workoutId, level) => {
+        // --- ROBUST VALIDATION ADDED ---
+        if (!workoutId || !level || !workoutsData[level]) {
+            console.error(`ERROR: Cannot start workout. Missing level (${level}) or ID (${workoutId}).`);
+            getEl('error-message').textContent = 'Error: Workout data is missing or corrupted. Please check your profile level.';
+            showModal('error-modal');
+            return;
+        }
+        
         currentWorkout = workoutsData[level].find(w => w.id == workoutId);
-        if (!currentWorkout) return;
+        
+        if (!currentWorkout) {
+            console.error(`ERROR: Workout ID ${workoutId} not found for level ${level}.`);
+            getEl('error-message').textContent = 'Error: Selected workout not found in library. Please try a different one.';
+            showModal('error-modal');
+            return;
+        }
+        // --- END ROBUST VALIDATION ---
+        
         currentRoundIndex = 0;
         showScreen('workout-player-screen');
         activeTimeouts.push(setTimeout(runNextRound, 500)); 
@@ -946,7 +1082,14 @@
 
     const generateCombo = () => {
         const selectedLength = parseInt(getEl('combo-length').value) || 2;
-        const { level } = getProfile();
+        let { level } = getProfile();
+        
+        // Safety Check 1: Ensure level exists in punch data
+        if (!punches[level]) {
+            console.warn(`Level '${level}' not found for Combo Generator. Defaulting to 'beginner'.`);
+            level = 'beginner';
+        }
+
         const availablePunches = punches[level];
         let combo = [];
         for (let i = 0; i < selectedLength; i++) {
@@ -997,7 +1140,14 @@
         getEl('fight-iq-timer').textContent = formatTime(fightIqSeconds);
         
         const showNextFightIqCue = () => {
-            const { level } = getProfile();
+            let { level } = getProfile();
+            
+            // Safety Check 2: Ensure level exists in cue data
+            if (!iqCues[level]) {
+                console.warn(`Level '${level}' not found for Fight IQ. Defaulting to 'beginner'.`);
+                level = 'beginner';
+            }
+
             const cue = iqCues[level][Math.floor(Math.random() * iqCues[level].length)];
             getEl('fight-iq-cue-display').textContent = cue;
             speak(cue);
@@ -1048,10 +1198,17 @@
         verbalTimerDisplay.textContent = formatTime(verbalSeconds);
         
         const showNextVerbalCue = () => {
-            const { level } = getProfile();
+            let { level } = getProfile();
+            
+            // Safety Check 3: Ensure level exists in cue data
+            if (!verbalCues[level]) {
+                console.warn(`Level '${level}' not found for Verbal Sparring. Defaulting to 'beginner'.`);
+                level = 'beginner';
+            }
+            
             const cueSpoken = verbalCues[level][Math.floor(Math.random() * verbalCues[level].length)];
             
-            // Fix: Display 'Slip', but send 'Slipp' to speak function for correct pronunciation
+            // Display 'Slip', but send 'Slipp' to speak function for correct pronunciation
             const cueDisplayed = cueSpoken.replace(/Slipp/g, 'Slip'); 
 
             verbalCueDisplay.textContent = cueDisplayed; 
@@ -1124,11 +1281,33 @@
     // --- APP ENTRY POINT ---
     function initSound() {
         if (soundsReady) return;
-        Tone.start(); 
-        soundsReady = true; 
-        console.log("Audio context started. Tone.js ready.");
+        
+        // Check if Tone.js has started and if the context state is suspended
+        if (Tone.context.state !== 'running') {
+            Tone.start().then(() => {
+                soundsReady = true; 
+                console.log("Audio context started/resumed.");
+            }).catch(e => console.error("Audio context start failed:", e));
+        } else {
+             soundsReady = true;
+             console.log("Audio context already running.");
+        }
+        
+        // Once initialized, add a handler to resume if suspended (key mobile fix!)
+        document.body.addEventListener('click', resumeAudioContext, { once: true }); 
         document.body.removeEventListener('click', initSound);
     }
+
+    // New function to resume audio after suspension (key mobile fix!)
+    const resumeAudioContext = () => {
+        if (Tone.context.state === 'suspended') {
+            Tone.context.resume().then(() => {
+                console.log("Audio context resumed on user interaction.");
+            });
+        }
+        // Re-attach the handler since we used { once: true } before
+        document.body.addEventListener('click', resumeAudioContext);
+    };
 
     const initialize = () => {
         // Explicitly check for saved profile object after loading state
