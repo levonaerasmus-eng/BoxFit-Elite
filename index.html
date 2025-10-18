@@ -1,0 +1,1161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>BoxFit | Elite</title>
+    
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="glove-192.png">
+    <meta name="theme-color" content="#E53E3E">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.7.77/Tone.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #E53E3E; /* Energetic Red */
+            --primary-color-dark: #C53030;
+            --secondary-color: #0A0A0A; /* Deep Black */
+            --text-color: #EDF2F7;
+            --text-color-dark: #A0AEC0;
+            --card-color: rgba(26, 26, 26, 0.85); /* Slightly less transparent glass */
+            --border-color: rgba(255, 255, 255, 0.15); /* Slightly more visible border */
+        }
+        ::-webkit-scrollbar { display: none; }
+        html, body { -webkit-tap-highlight-color: transparent; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--secondary-color);
+            background-image: radial-gradient(circle at top, #1a1a1a 10%, #0A0A0A 70%);
+            color: var(--text-color);
+            overscroll-behavior: none;
+        }
+        .font-anton { font-family: 'Anton', sans-serif; letter-spacing: 0.05em; text-transform: uppercase; }
+        .main-container {
+            max-width: 420px; margin: auto; min-height: 100vh;
+            display: flex; flex-direction: column;
+            box-shadow: 0 0 60px rgba(0,0,0,0.8);
+            background-color: transparent;
+        }
+        .screen { display: none; flex-grow: 1; flex-direction: column; }
+        .screen.active { display: flex; animation: fadeIn 0.5s ease-out forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Components */
+        .btn {
+            font-family: 'Anton', sans-serif; letter-spacing: 1.5px;
+            padding: 16px 24px; border-radius: 12px;
+            transition: all 0.2s ease-out; cursor: pointer; border: none;
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+            user-select: none;
+        }
+        .btn:disabled { background-color: #4A5568; cursor: not-allowed; box-shadow: none; }
+        .btn-primary {
+            background: var(--primary-color);
+            color: white;
+            box-shadow: 0 5px 20px rgba(229, 62, 62, 0.3), inset 0 2px 0 rgba(255,255,255,0.2);
+        }
+        .btn-primary:hover:not(:disabled) { background: var(--primary-color-dark); transform: translateY(-2px); box-shadow: 0 8px 25px rgba(229, 62, 62, 0.4); }
+        .btn-secondary {
+            background-color: var(--card-color);
+            border: 1px solid var(--border-color); color: var(--text-color);
+        }
+        .btn-secondary:hover:not(:disabled) { background-color: rgba(255, 255, 255, 0.1); border-color: rgba(255, 255, 255, 0.2); }
+        .glass-card {
+            background: var(--card-color);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            box-shadow: 0 10px 35px 0 rgba(0, 0, 0, 0.5); /* Elevated shadow */
+        }
+        .bottom-nav {
+            background: rgba(10, 10, 10, 0.7);
+            backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
+            border-top: 1px solid var(--border-color);
+        }
+        .nav-item { transition: all 0.2s ease-in-out; display:flex; flex-direction:column; align-items:center; }
+        .nav-item.active { color: var(--primary-color); transform: scale(1.1) translateY(-3px); text-shadow: 0 0 20px var(--primary-color); }
+        
+        input, select {
+            background: rgba(0,0,0,0.2); border: 1px solid var(--border-color);
+            border-radius: 10px; color: var(--text-color); padding: 14px; width: 100%; font-size: 1rem;
+        }
+        input:focus, select:focus { outline: none; border-color: var(--primary-color); box-shadow: 0 0 0 3px rgba(229, 62, 62, 0.3); }
+        .choice-card.selected { border-color: var(--primary-color); background: rgba(229, 62, 62, 0.2); }
+
+        /* Voice Toggle Switch */
+        .toggle-label {
+            transition: background-color 0.2s ease-in-out;
+        }
+        .toggle-checkbox:checked + .toggle-label {
+            background-color: var(--primary-color);
+        }
+        .toggle-checkbox {
+            transition: transform 0.2s ease-in-out;
+        }
+        .toggle-checkbox:checked {
+            transform: translateX(20px); /* Fixed positioning */
+        }
+        
+        /* Specifics */
+        #welcome-screen {
+            background: linear-gradient(180deg, rgba(0,0,0,0.7) 0%, #0A0A0A 100%), url(https://images.unsplash.com/photo-1574680178023-e96a2d458514?q=80&w=1887&auto-format&fit=crop) center/cover no-repeat;
+        }
+        .fighter-card-stat { border-left: 3px solid var(--primary-color); }
+        .combo-display span { 
+            display: inline-block; 
+            background: var(--card-color); 
+            padding: 14px 20px; /* Slightly larger targets */
+            border-radius: 10px; 
+            margin: 6px; /* Increased space */
+            border: 1px solid var(--border-color); 
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        }
+        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0, 0, 0, 0.75); backdrop-filter: blur(8px); display: flex; justify-content: center; align-items: center; z-index: 1000; opacity: 0; visibility: hidden; transition: all 0.3s ease-in-out; }
+        .modal-overlay.active { opacity: 1; visibility: visible; }
+        .modal-content { transform: scale(0.9); transition: all 0.3s ease-in-out; }
+        .modal-overlay.active .modal-content { transform: scale(1); }
+        #run-timer-display { transition: color 0.3s ease-in-out; }
+        #run-timer-display.running { color: var(--primary-color); text-shadow: 0 0 20px var(--primary-color); }
+        .filter-btn {
+            background-color: var(--card-color); border: 1px solid var(--border-color); color: var(--text-color);
+            padding: 8px 16px; border-radius: 8px; white-space: nowrap;
+        }
+        .filter-btn.active {
+            background-color: var(--primary-color); color: white; border-color: var(--primary-color-dark);
+        }
+        .select-label { font-size: 0.9rem; color: var(--text-color-dark); }
+        #combo-length { max-width: 150px; }
+
+    </style>
+</head>
+<body class="overflow-x-hidden">
+
+    <div id="app" class="main-container">
+
+        <div id="welcome-screen" class="screen p-6 justify-end text-center active">
+            <div class="flex flex-col items-center">
+                <i class="fas fa-fist-raised text-6xl text-primary-color mb-4"></i>
+                <h1 class="font-anton text-6xl">BOXFIT</h1>
+                <p class="text-xl text-text-color-dark mb-6">ELITE TRAINING SYSTEM</p>
+                <button id="get-started-btn" class="btn btn-primary w-full text-lg">Unleash Your Potential</button>
+            </div>
+        </div>
+
+        <div id="profile-setup-screen" class="screen p-6 justify-center">
+             <div class="w-full">
+                <h2 class="font-anton text-4xl mb-2 text-center">Build Your Profile</h2>
+                <p class="text-text-color-dark mb-8 text-center">Let's craft your personalized training plan.</p>
+                <div class="space-y-6">
+                    <div>
+                        <label class="font-bold text-sm text-text-color-dark mb-2 block">STEP 1: YOUR NAME</label>
+                        <input type="text" id="name" placeholder="Enter Your Name" required>
+                    </div>
+                    <div>
+                         <label class="font-bold text-sm text-text-color-dark mb-2 block">STEP 2: YOUR FOCUS</label>
+                         <div class="grid grid-cols-2 gap-4">
+                            <select id="level"><option value="" disabled selected>Fitness Level</option><option value="beginner">Beginner</option><option value="intermediate">Intermediate</option><option value="advanced">Advanced</option></select>
+                            <select id="goal"><option value="" disabled selected>Primary Goal</option><option value="technique">Technique</option><option value="cardio">Cardio</option><option value="strength">Strength</option><option value="weight_loss">Weight Loss</option></select>
+                         </div>
+                    </div>
+                    <div>
+                        <label class="font-bold text-sm text-text-color-dark mb-2 block">STEP 3: YOUR GEAR</label>
+                        <div id="equipment-choices" class="grid grid-cols-2 gap-4 text-center">
+                            <div class="choice-card glass-card p-4 cursor-pointer border-2 border-transparent flex flex-col items-center justify-center gap-2" data-value="none">
+                                <i class="fas fa-running text-3xl"></i>
+                                <span class="font-semibold">Bodyweight</span>
+                            </div>
+                            <div class="choice-card glass-card p-4 cursor-pointer border-2 border-transparent flex flex-col items-center justify-center gap-2" data-value="heavy_bag">
+                                <i class="fas fa-sack-xmark text-3xl"></i>
+                                <span class="font-semibold">Heavy Bag</span>
+                            </div>
+                            <div class="choice-card glass-card p-4 cursor-pointer border-2 border-transparent flex flex-col items-center justify-center gap-2" data-value="dumbbells">
+                                <i class="fas fa-dumbbell text-3xl"></i>
+                                <span class="font-semibold">Dumbbells</span>
+                            </div>
+                            <div class="choice-card glass-card p-4 cursor-pointer border-2 border-transparent flex flex-col items-center justify-center gap-2" data-value="jump_rope">
+                                <i class="fas fa-infinity text-3xl"></i>
+                                <span class="font-semibold">Jump Rope</span>
+                            </div>
+                        </div>
+                    </div>
+                    <button id="finish-setup-btn" class="btn btn-primary w-full !mt-8">Start Training</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="main-app" class="hidden flex-grow flex flex-col">
+            <main class="flex-grow p-4 md:p-6 overflow-y-auto">
+                
+                <div id="dashboard-screen" class="screen">
+                    <div class="flex justify-between items-center mb-6 px-2"><div><p class="text-text-color-dark text-sm" id="welcome-message">Welcome Back!</p><h2 class="font-anton text-3xl">Dashboard</h2></div><button class="nav-button" data-target="profile-screen"><i class="fas fa-user-cog text-2xl text-text-color-dark hover:text-primary-color transition-colors"></i></button></div>
+                    <div id="fighter-card" class="glass-card p-4 mb-6"><h3 class="font-anton text-xl mb-3 px-2">Fighter Card</h3><div class="grid grid-cols-3 gap-2 text-center"><div class="fighter-card-stat pl-2 text-left"><p class="font-anton text-2xl" id="streak-stat">0</p><p class="text-xs text-text-color-dark uppercase">Day Streak</p></div><div class="fighter-card-stat pl-2 text-left"><p class="font-anton text-2xl" id="workouts-stat">0</p><p class="text-xs text-text-color-dark uppercase">Workouts</p></div><div class="fighter-card-stat pl-2 text-left"><p class="font-anton text-2xl" id="time-stat">0<span class="text-base">m</span></p><p class="text-xs text-text-color-dark uppercase">Time</p></div></div></div>
+                    <div class="mb-6 px-2"><h3 class="font-anton text-xl mb-3">Quick Launch</h3>
+                        <div class="glass-card p-4 flex items-center justify-between cursor-pointer nav-button" data-target="runner-screen">
+                            <div><p class="font-bold">Road Work</p><p class="text-sm text-text-color-dark">Start a freestyle run</p></div>
+                             <button class="btn btn-primary !p-3 !rounded-full"><i class="fas fa-person-running"></i></button>
+                        </div>
+                    </div>
+                    <div class="mb-6 px-2"><h3 class="font-anton text-xl mb-3">Activity Overview</h3><div class="glass-card p-4"><canvas id="activity-chart"></canvas></div></div>
+                    <div class="mb-6 px-2"><h3 class="font-anton text-xl mb-3">Today's Plan</h3><div id="recommended-list" class="space-y-3"></div></div>
+                </div>
+
+                <div id="workouts-screen" class="screen">
+                     <h2 class="font-anton text-3xl mb-4 px-2">Workout Library</h2>
+                     <div id="filter-container" class="flex space-x-2 mb-4 overflow-x-auto px-2 pb-2"></div>
+                     <div id="workout-list" class="space-y-3 px-2"></div>
+                </div>
+                
+                <div id="workout-player-screen" class="screen justify-between p-4 text-center">
+                    <div id="player-header" class="w-full"><h2 id="player-title" class="font-anton text-3xl"></h2><p id="player-round-status" class="text-text-color-dark"></p></div>
+                    <div id="player-main" class="w-full"><p id="player-instruction-text" class="font-anton text-6xl leading-tight"></p></div>
+                    <div id="player-footer" class="w-full"><p id="player-next-up" class="text-text-color-dark mb-2">Next: </p><div id="player-timer-display" class="font-anton text-8xl mb-4">00:00</div><button id="end-workout-btn" class="btn btn-secondary w-full">End Workout</button></div>
+                </div>
+
+                <div id="runner-screen" class="screen justify-between p-4">
+                    <div class="flex justify-between items-center w-full">
+                        <button class="nav-button text-text-color-dark" data-target="dashboard-screen"><i class="fas fa-arrow-left mr-2"></i>Dashboard</button>
+                    </div>
+                    <div class="flex flex-col items-center justify-center flex-grow">
+                        <div id="run-timer-display" class="font-anton text-8xl mb-6">00:00:00</div>
+                        <div class="grid grid-cols-3 gap-4 w-full text-center">
+                            <div><p class="font-anton text-3xl" id="run-distance">0.00</p><p class="text-sm text-text-color-dark">KILOMETERS</p></div>
+                            <div><p class="font-anton text-3xl" id="run-pace">--'--</p><p class="text-sm text-text-color-dark">PACE / KM</p></div>
+                            <div><p class="font-anton text-3xl" id="run-calories">0</p><p class="text-sm text-text-color-dark">CALORIES</p></div>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4 w-full">
+                         <button id="end-run-btn" class="btn btn-secondary hidden"><i class="fas fa-stop"></i>End Run</button>
+                         <button id="start-stop-run-btn" class="btn btn-primary col-span-2"><i class="fas fa-play"></i>Start Run</button>
+                    </div>
+                </div>
+
+                <div id="rope-flow-screen" class="screen justify-between p-4">
+                    <div class="flex justify-between items-center w-full">
+                        <button class="nav-button text-text-color-dark" data-target="drills-screen"><i class="fas fa-arrow-left mr-2"></i>Drills</button>
+                    </div>
+                    <div class="flex flex-col items-center justify-center flex-grow">
+                        <p class="text-sm text-text-color-dark mb-2">TIME ELAPSED</p>
+                        <div id="rope-timer-display" class="font-anton text-8xl mb-6">00:00</div>
+                        <div class="grid grid-cols-3 gap-4 w-full text-center">
+                            <div><p class="font-anton text-3xl" id="rope-jumps">0</p><p class="text-sm text-text-color-dark">JUMPS</p></div>
+                            <div><p class="font-anton text-3xl" id="rope-jpm">--</p><p class="text-sm text-text-color-dark">JPM</p></div>
+                            <div><p class="font-anton text-3xl" id="rope-calories">0</p><p class="text-sm text-text-color-dark">CALORIES</p></div>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4 w-full">
+                         <button id="end-rope-btn" class="btn btn-secondary hidden"><i class="fas fa-stop"></i>End Session</button>
+                         <button id="start-stop-rope-btn" class="btn btn-primary col-span-2"><i class="fas fa-play"></i>Start Session</button>
+                    </div>
+                </div>
+
+                <div id="drills-screen" class="screen p-4 flex-col">
+                     <h2 class="font-anton text-3xl mb-6 px-2">Training Drills</h2>
+                     <div class="w-full space-y-4 flex-grow">
+                         <div data-target="rope-flow-screen" class="nav-button glass-card p-6 w-full flex items-center gap-6 cursor-pointer">
+                             <i class="fas fa-skiing text-4xl text-primary-color w-12 text-center"></i>
+                             <div>
+                                <p class="font-anton text-2xl">Rope Flow</p>
+                                <p class="text-text-color-dark">Timed skipping sessions.</p>
+                             </div>
+                        </div>
+                        <div data-target="fight-iq-screen" class="nav-button glass-card p-6 w-full flex items-center gap-6 cursor-pointer">
+                            <i class="fas fa-brain text-4xl text-primary-color w-12 text-center"></i>
+                            <div>
+                                <p class="font-anton text-2xl">Fight IQ</p>
+                                <p class="text-text-color-dark">Combine offense & defense.</p>
+                            </div>
+                        </div>
+                         <div data-target="combo-generator-screen" class="nav-button glass-card p-6 w-full flex items-center gap-6 cursor-pointer">
+                             <i class="fas fa-project-diagram text-4xl text-primary-color w-12 text-center"></i>
+                             <div>
+                                <p class="font-anton text-2xl">Combination Generator</p>
+                                <p class="text-text-color-dark">Master offensive flows.</p>
+                             </div>
+                        </div>
+                        <div data-target="verbal-sparring-screen" class="nav-button glass-card p-6 w-full flex items-center gap-6 cursor-pointer">
+                             <i class="fas fa-bolt text-4xl text-primary-color w-12 text-center"></i>
+                             <div>
+                                <p class="font-anton text-2xl">Verbal Sparring</p>
+                                <p class="text-text-color-dark">React to spoken commands.</p>
+                             </div>
+                        </div>
+                     </div>
+                </div>
+
+                <div id="fight-iq-screen" class="screen justify-between p-4 text-center">
+                    <div class="w-full flex justify-between items-center"><button class="nav-button text-text-color-dark" data-target="drills-screen"><i class="fas fa-arrow-left mr-2"></i>Back</button><p class="font-anton text-lg">Score: <span id="fight-iq-score">0</span></p></div>
+                    <div class="flex-grow flex flex-col justify-center"><div id="fight-iq-cue-display" class="font-anton text-5xl">Press Start</div></div>
+                    <div class="w-full"><p id="fight-iq-timer" class="font-anton text-6xl mb-4">3:00</p><button id="start-fight-iq-btn" class="btn btn-primary w-full">Start Round</button></div>
+                </div>
+
+                <div id="combo-generator-screen" class="screen justify-between p-4 text-center">
+                    <button class="nav-button text-text-color-dark self-start" data-target="drills-screen"><i class="fas fa-arrow-left mr-2"></i>Back</button>
+                    <div class="flex-grow flex flex-col justify-center">
+                        <h2 class="font-anton text-2xl text-text-color-dark mb-4">Focus On This</h2>
+                        <div id="combo-display" class="font-anton text-4xl mb-8"><span>1</span><span>2</span></div>
+                        <div class="w-full flex flex-col items-center space-y-4">
+                            <label for="combo-length" class="select-label">Select Combo Length:</label>
+                            <select id="combo-length" class="w-full max-w-xs text-center"><option value="2">2 Hits (Beginner)</option><option value="4">4 Hits (Intermediate)</option><option value="6">6 Hits (Advanced)</option></select>
+                        </div>
+                        <p id="combo-timer-display" class="font-anton text-6xl mt-6 mb-4 hidden">3:00</p>
+                    </div>
+                    <div class="w-full grid grid-cols-2 gap-4"><button id="change-combo-btn" class="btn btn-secondary"><i class="fas fa-sync-alt"></i>New Combo</button><button id="start-combo-timer-btn" class="btn btn-primary"><i class="fas fa-play"></i>3-Min Round</button></div>
+                </div>
+
+                <div id="verbal-sparring-screen" class="screen justify-between p-4 text-center">
+                    <div class="w-full flex justify-between items-center">
+                        <button class="nav-button text-text-color-dark" data-target="drills-screen"><i class="fas fa-arrow-left mr-2"></i>Back</button>
+                        <p class="font-anton text-lg">Cues: <span id="verbal-cues-count">0</span></p>
+                    </div>
+                    <div class="flex-grow flex flex-col justify-center">
+                        <h2 class="font-anton text-2xl text-text-color-dark mb-4">React Now!</h2>
+                        <div id="verbal-cue-display" class="font-anton text-5xl">Press Start</div>
+                    </div>
+                    <div class="w-full">
+                        <p id="verbal-timer" class="font-anton text-6xl mb-4">3:00</p>
+                        <button id="start-verbal-btn" class="btn btn-primary w-full">Start Sparring Round</button>
+                    </div>
+                </div>
+
+                <div id="progress-screen" class="screen">
+                    <h2 class="font-anton text-3xl mb-6 px-2">Activity Log</h2>
+                    <div id="progress-log" class="space-y-3 px-2"><p class="text-text-color-dark text-center mt-8">No activities logged yet.</p></div>
+                </div>
+                
+                <div id="profile-screen" class="screen p-6">
+                    <h2 class="font-anton text-3xl mb-6">Settings</h2>
+                    <div id="profile-summary" class="space-y-3 glass-card p-4"></div>
+                    <div class="glass-card p-4 mt-6 flex justify-between items-center">
+                        <label for="voice-toggle" class="font-bold text-lg">Voice Cues</label>
+                        <div class="relative inline-block w-12 align-middle select-none">
+                            <input type="checkbox" name="voice-toggle" id="voice-toggle" class="toggle-checkbox absolute top-1 left-1 block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer border-gray-600"/>
+                            <label for="voice-toggle" class="toggle-label block overflow-hidden h-8 w-12 rounded-full bg-gray-600 cursor-pointer"></label>
+                        </div>
+                    </div>
+                    <button id="reset-data-btn" class="btn btn-secondary w-full mt-8"><i class="fas fa-trash"></i>Reset All Data</button>
+                </div>
+
+            </main>
+
+            <nav class="bottom-nav sticky bottom-0 w-full p-2 flex justify-around">
+                <button class="nav-item nav-button active" data-target="dashboard-screen"><i class="fas fa-home text-2xl"></i><span class="text-xs mt-1">Home</span></button>
+                <button class="nav-item nav-button" data-target="workouts-screen"><i class="fas fa-fist-raised text-2xl"></i><span class="text-xs mt-1">Workouts</span></button>
+                <button class="nav-item nav-button" data-target="drills-screen"><i class="fas fa-bullseye text-2xl"></i><span class="text-xs mt-1">Drills</span></button>
+                <button class="nav-item nav-button" data-target="progress-screen"><i class="fas fa-chart-line text-2xl"></i><span class="text-xs mt-1">Progress</span></button>
+            </nav>
+        </div>
+        
+        <div id="error-modal" class="modal-overlay"><div class="modal-content glass-card p-6 rounded-lg shadow-xl w-11/12 max-w-sm text-center"><i class="fas fa-exclamation-triangle text-5xl text-yellow-400 mb-4"></i><h2 class="font-anton text-2xl tracking-wide mb-2">Hold Up</h2><p id="error-message" class="text-text-color-dark mb-4">Please fill out all fields.</p><button class="close-modal-btn btn btn-primary w-full">OK</button></div></div>
+        <div id="finish-workout-modal" class="modal-overlay"><div class="modal-content glass-card p-6 rounded-lg shadow-xl w-11/12 max-w-sm text-center"><i class="fas fa-award text-5xl text-primary-color mb-4"></i><h2 class="font-anton text-2xl tracking-wide mb-2">Workout Complete!</h2><p class="text-text-color-dark mb-4">You burned an est. <span id="workout-calories-burned" class="font-bold text-white">0</span> calories.</p><button class="close-modal-btn btn btn-primary w-full" data-target="dashboard-screen">Back to Dashboard</button></div></div>
+        <div id="run-summary-modal" class="modal-overlay"><div class="modal-content glass-card p-6 rounded-lg shadow-xl w-11/12 max-w-sm text-center"><i class="fas fa-road text-5xl text-primary-color mb-4"></i><h2 class="font-anton text-2xl tracking-wide mb-2">Run Complete!</h2><div class="grid grid-cols-2 gap-4 my-4 text-left"><p class="text-text-color-dark">Time</p><p id="summary-run-time" class="font-bold text-right"></p><p class="text-text-color-dark">Distance</p><p id="summary-run-distance" class="font-bold text-right"></p><p class="text-text-color-dark">Avg. Pace</p><p id="summary-run-pace" class="font-bold text-right"></p><p class="text-text-color-dark">Calories</p><p id="summary-run-calories" class="font-bold text-right"></p></div><button id="close-run-summary-btn" class="close-modal-btn btn btn-primary w-full" data-target="dashboard-screen">Done</button></div></div>
+        <div id="rope-summary-modal" class="modal-overlay"><div class="modal-content glass-card p-6 rounded-lg shadow-xl w-11/12 max-w-sm text-center"><i class="fas fa-skiing text-5xl text-primary-color mb-4"></i><h2 class="font-anton text-2xl tracking-wide mb-2">Rope Session Complete!</h2><div class="grid grid-cols-2 gap-4 my-4 text-left"><p class="text-text-color-dark">Time</p><p id="summary-rope-time" class="font-bold text-right"></p><p class="text-text-color-dark">Total Jumps</p><p id="summary-rope-jumps" class="font-bold text-right"></p><p class="text-text-color-dark">Avg. JPM</p><p id="summary-rope-jpm" class="font-bold text-right"></p><p class="text-text-color-dark">Calories</p><p id="summary-rope-calories" class="font-bold text-right"></p></div><button id="close-rope-summary-btn" class="close-modal-btn btn btn-primary w-full" data-target="dashboard-screen">Done</button></div></div>
+        <div id="confirm-modal" class="modal-overlay"><div class="modal-content glass-card p-6 rounded-lg shadow-xl w-11/12 max-w-sm text-center"><i class="fas fa-trash-alt text-5xl text-primary-color mb-4"></i><h2 class="font-anton text-2xl tracking-wide mb-2">Are you sure?</h2><p id="confirm-message" class="text-text-color-dark mb-6">This action cannot be undone.</p><div class="grid grid-cols-2 gap-4"><button id="cancel-reset-btn" class="btn btn-secondary">Cancel</button><button id="confirm-reset-btn" class="btn btn-primary">Reset Data</button></div></div></div>
+    </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+
+    // --- 1. DATA & STATE MANAGEMENT ---
+    const workoutsData = {
+        beginner: [
+            { id: 101, title: 'Boxing Basics', goal: 'technique', duration: 15, calories: 120, equipment: ['none'], rounds: [{type: 'work', text: 'Stance & Footwork', time: 180}, {type: 'rest', time: 60}, {type: 'work', text: 'Jab Practice', time: 180}, {type: 'rest', time: 60}, {type: 'work', text: 'Cross Practice', time: 180}] },
+            { id: 102, title: 'Cardio Foundation', goal: 'cardio', duration: 20, calories: 200, equipment: ['jump_rope'], rounds: [{type: 'work', text: 'Jumping Rope', time: 180}, {type: 'rest', time: 60}, {type: 'work', text: 'Shadowboxing', time: 180}, {type: 'rest', time: 60}, {type: 'work', text: 'Jumping Rope', time: 180}, {type: 'rest', time: 60}, {type: 'work', text: 'Shadowboxing', time: 180}] },
+            { id: 103, title: 'First Power', goal: 'strength', duration: 15, calories: 150, equipment: ['heavy_bag'], rounds: [{type: 'work', text: 'Power Jabs', time: 180}, {type: 'rest', time: 60}, {type: 'work', text: 'Power Crosses', time: 180}, {type: 'rest', time: 60}, {type: 'work', text: 'Jab-Cross Combo', time: 180}] },
+            { id: 104, title: 'Light Burn', goal: 'weight_loss', duration: 20, calories: 220, equipment: ['none', 'jump_rope'], rounds: [{type: 'work', text: 'Warmup Jog', time: 120}, {type: 'rest', time: 30}, {type: 'work', text: 'Shadowboxing', time: 180}, {type: 'rest', time: 60}, {type: 'work', text: 'High Knees', time: 120}, {type: 'rest', time: 60}, {type: 'work', text: 'Shadowboxing', time: 180}] },
+            { id: 105, title: 'Footwork 101', goal: 'technique', duration: 15, calories: 100, equipment: ['none'], rounds: [{type: 'work', text: 'Forward/Backward Step', time: 180}, {type: 'rest', time: 60}, {type: 'work', text: 'Lateral Shuffles', time: 180}, {type: 'rest', time: 60}, {type: 'work', text: 'Pivot Practice', time: 180}] },
+            { id: 106, title: 'Tabata Starter', goal: 'cardio', duration: 16, calories: 180, equipment: ['none'], rounds: [{type: 'work', text: 'Jab-Cross Tabata', time: 180}, {type: 'rest', time: 60}, {type: 'work', text: 'Squat-Punch Tabata', time: 180}] },
+            { id: 107, title: 'Bodyweight Blitz', goal: 'strength', duration: 20, calories: 180, equipment: ['none'], rounds: [{type: 'work', text: 'Pushups & Situps', time: 180}, {type: 'rest', time: 60}, {type: 'work', text: 'Squats & Lunges', time: 180}, {type: 'rest', time: 60}, {type: 'work', text: 'Plank Holds', time: 120}] },
+            { id: 108, title: 'Calorie Crusher', goal: 'weight_loss', duration: 25, calories: 300, equipment: ['jump_rope'], rounds: [{type: 'work', text: 'Rope & High Knees', time: 180}, {type: 'rest', time: 30}, {type: 'work', text: 'Shadowbox Flurry', time: 180}, {type: 'rest', time: 30}, {type: 'work', text: 'Burpees (Modified)', time: 120}, {type: 'rest', time: 30}, {type: 'work', text: 'Cool Down Shadow', time: 180}] },
+            
+            { id: 109, title: 'Defense 101', goal: 'technique', duration: 18, calories: 140, equipment: ['none'], rounds: [{type: 'work', text: 'Slip Left, Slip Right', time: 180}, {type: 'rest', time: 60}, {type: 'work', text: 'Roll Under', time: 180}, {type: 'rest', time: 60}, {type: 'work', text: 'Basic Blocks', time: 180}] },
+            { id: 110, title: 'Short Circuit Cardio', goal: 'cardio', duration: 15, calories: 190, equipment: ['none'], rounds: [{type: 'work', text: '30s Jumping Jacks, 30s Shadowbox', time: 120}, {type: 'rest', time: 45}, {type: 'work', text: '30s High Knees, 30s Jabs', time: 120}, {type: 'rest', time: 45}, {type: 'work', text: '45s Sprint Punching', time: 90}] },
+            { id: 111, title: 'DB Punch Strength', goal: 'strength', duration: 25, calories: 230, equipment: ['dumbbells'], rounds: [{type: 'work', text: 'Weighted Jabs & Crosses', time: 180}, {type: 'rest', time: 60}, {type: 'work', text: 'DB Squats to Punch', time: 180}, {type: 'rest', time: 60}, {type: 'work', text: 'Weighted Shadowbox', time: 180}] },
+            { id: 112, title: 'Long Rope Endurance', goal: 'cardio', duration: 30, calories: 350, equipment: ['jump_rope'], rounds: [{type: 'work', text: 'Steady Pace Jump', time: 300}, {type: 'rest', time: 60}, {type: 'work', text: 'Shadowbox Flow', time: 180}, {type: 'rest', time: 60}, {type: 'work', text: 'Steady Pace Jump', time: 300}] },
+            { id: 113, title: 'Bag Volume Drill', goal: 'weight_loss', duration: 20, calories: 250, equipment: ['heavy_bag'], rounds: [{type: 'work', text: 'Jab-Cross Continuous', time: 180}, {type: 'rest', time: 45}, {type: 'work', text: 'Hook-Hook Speed Drill', time: 180}, {type: 'rest', time: 45}, {type: 'work', text: 'Freestyle Fast Punches', time: 120}] },
+            { id: 114, title: 'Beginner Core', goal: 'strength', duration: 12, calories: 80, equipment: ['none'], rounds: [{type: 'work', text: 'Crunches & Leg Raises', time: 120}, {type: 'rest', time: 45}, {type: 'work', text: 'Side Planks (Each Side)', time: 120}] }
+        ],
+        intermediate: [
+            { id: 201, title: 'Flow & Defend', goal: 'technique', duration: 25, calories: 280, equipment: ['none'], rounds: [{type: 'work', text: 'Jab-Cross-Slip', time: 180}, {type: 'rest', time: 60}, {type: 'work', text: 'Hook & Weave', time: 180}, {type: 'rest', time: 60}, {type: 'work', text: 'Footwork Drills', time: 180}, {type: 'rest', time: 60}, {type: 'work', text: 'Freestyle Shadowbox', time: 180}] },
+            { id: 202, title: 'HIIT The Bag', goal: 'cardio', duration: 20, calories: 350, equipment: ['heavy_bag'], rounds: [{type: 'work', text: '30s On / 30s Off', time: 180}, {type: 'rest', time: 60}, {type: 'work', text: 'Power Combos', time: 180}, {type: 'rest', time: 60}, {type: 'work', text: '30s On / 30s Off', time: 180}] },
+            { id: 203, title: 'Full Body Strength', goal: 'strength', duration: 30, calories: 300, equipment: ['dumbbells'], rounds: [{type: 'work', text: 'Renegade Rows', time: 180}, {type: 'rest', time: 60}, {type: 'work', text: 'Squat to Press', time: 180}, {type: 'rest', time: 60}, {type: 'work', text: 'Weighted Shadowbox', time: 180}] },
+            { id: 204, title: 'Metabolic Meltdown', goal: 'weight_loss', duration: 25, calories: 400, equipment: ['jump_rope', 'heavy_bag'], rounds: [{type: 'work', text: 'Rope Intervals', time: 180}, {type: 'rest', time: 45}, {type: 'work', text: 'Bag Blast', time: 180}, {type: 'rest', time: 45}, {type: 'work', text: 'Rope Intervals', time: 180}, {type: 'rest', time: 45}, {type: 'work', text: 'Bag Blast', time: 180}] },
+            { id: 205, title: 'Angle Mastery', goal: 'technique', duration: 25, calories: 250, equipment: ['none'], rounds: [{type: 'work', text: 'Angle/Stance Switch', time: 180}, {type: 'rest', time: 60}, {type: 'work', text: 'L-Step Counters', time: 180}, {type: 'rest', time: 60}, {type: 'work', text: 'Out-Fighting Drill', time: 180}] },
+            { id: 206, title: 'Heavy Bag Tabata', goal: 'cardio', duration: 20, calories: 420, equipment: ['heavy_bag'], rounds: [{type: 'work', text: 'Power 1-2 Tabata', time: 180}, {type: 'rest', time: 45}, {type: 'work', text: 'Hook/Uppercut Tabata', time: 180}, {type: 'rest', time: 45}, {type: 'work', text: 'Freestyle Burst', time: 120}] },
+            { id: 207, title: 'Weighted Burpee Flow', goal: 'strength', duration: 30, calories: 350, equipment: ['dumbbells'], rounds: [{type: 'work', text: 'Weighted Burpees', time: 180}, {type: 'rest', time: 60}, {type: 'work', text: 'Overhead Press Combo', time: 180}, {type: 'rest', time: 60}, {type: 'work', text: 'Russian Twists', time: 120}] },
+            { id: 208, title: 'Full Circuit Burn', goal: 'weight_loss', duration: 30, calories: 500, equipment: ['jump_rope', 'none'], rounds: [{type: 'work', text: 'Rope Intervals (Fast)', time: 180}, {type: 'rest', time: 30}, {type: 'work', text: 'Shadowbox Squats', time: 180}, {type: 'rest', time: 30}, {type: 'work', text: 'Mountain Climbers', time: 120}, {type: 'rest', time: 30}, {type: 'work', text: 'Core Blast', time: 120}] },
+            
+            { id: 209, title: 'In-and-Out Defense', goal: 'technique', duration: 30, calories: 320, equipment: ['none'], rounds: [{type: 'work', text: 'Footwork: Step In, Slip, Step Out', time: 180}, {type: 'rest', time: 45}, {type: 'work', text: 'Block, Pivot, Counter', time: 180}, {type: 'rest', time: 45}, {type: 'work', text: 'Freestyle Movement & Defense', time: 180}] },
+            { id: 210, title: '4-Minute Blitz', goal: 'cardio', duration: 28, calories: 450, equipment: ['heavy_bag'], rounds: [{type: 'work', text: '4-Min High Intensity Bag Work', time: 240}, {type: 'rest', time: 60}, {type: 'work', text: '4-Min High Intensity Bag Work', time: 240}, {type: 'rest', time: 60}, {type: 'work', text: '4-Min High Intensity Bag Work', time: 240}] },
+            { id: 211, title: 'Complex Combo Drill', goal: 'technique', duration: 20, calories: 240, equipment: ['none'], rounds: [{type: 'work', text: '1-2-3-Roll-2', time: 180}, {type: 'rest', time: 60}, {type: 'work', text: 'Jab-Weave-Hook-Cross', time: 180}, {type: 'rest', time: 60}, {type: 'work', text: 'Freestyle Flow', time: 180}] },
+            { id: 212, title: 'Dumbbell Endurance', goal: 'strength', duration: 35, calories: 400, equipment: ['dumbbells'], rounds: [{type: 'work', text: 'DB Punches (Light)', time: 240}, {type: 'rest', time: 60}, {type: 'work', text: 'Weighted Shadow (Medium)', time: 240}, {type: 'rest', time: 60}, {type: 'work', text: 'Core & Stabilizer Drills', time: 180}] },
+            { id: 213, title: 'Rope and Shadow Interval', goal: 'weight_loss', duration: 25, calories: 380, equipment: ['jump_rope'], rounds: [{type: 'work', text: 'Rope HIIT 60s On / 30s Off', time: 180}, {type: 'rest', time: 30}, {type: 'work', text: 'Shadowbox Max Speed', time: 180}, {type: 'rest', time: 30}, {type: 'work', text: 'Repeat Rope HIIT', time: 180}] },
+            { id: 214, title: 'Bodyweight Boxer', goal: 'strength', duration: 20, calories: 250, equipment: ['none'], rounds: [{type: 'work', text: 'Plyometric Pushups', time: 120}, {type: 'rest', time: 45}, {type: 'work', text: 'Single-Leg Squats (Modified)', time: 180}, {type: 'rest', time: 45}, {type: 'work', text: 'Mountain Climbers & Planks', time: 120}] }
+        ],
+        advanced: [
+            { id: 301, title: 'Counter Punching', goal: 'technique', duration: 30, calories: 400, equipment: ['heavy_bag'], rounds: [{type: 'work', text: 'Slip & Rip', time: 180}, {type: 'rest', time: 45}, {type: 'work', text: 'Pull Counter', time: 180}, {type: 'rest', time: 45}, {type: 'work', text: 'Angle & Attack', time: 180}, {type: 'rest', time: 45}, {type: 'work', text: 'Freestyle Counters', time: 180}] },
+            { id: 302, title: 'Championship Rounds', goal: 'cardio', duration: 35, calories: 500, equipment: ['heavy_bag', 'jump_rope'], rounds: [{type: 'work', text: 'Rope Warmup', time: 180}, {type: 'rest', time: 60}, {type: 'work', text: 'High-Pace Bag Work', time: 180}, {type: 'rest', time: 60}, {type: 'work', text: 'Footwork & Speed', time: 180}, {type: 'rest', time: 60}, {type: 'work', text: 'High-Pace Bag Work', time: 180}, {type: 'rest', time: 60}, {type: 'work', text: 'Burnout Round', time: 180}] },
+            { id: 303, title: 'Explosive Power', goal: 'strength', duration: 25, calories: 380, equipment: ['dumbbells', 'heavy_bag'], rounds: [{type: 'work', text: 'Plyo Pushups', time: 180}, {type: 'rest', time: 60}, {type: 'work', text: 'Max Power Bag Combos', time: 180}, {type: 'rest', time: 60}, {type: 'work', text: 'Dumbbell Snatches', time: 180}, {type: 'rest', time: 60}, {type: 'work', text: 'Max Power Bag Combos', time: 180}] },
+            { id: 304, title: 'The Shredder', goal: 'weight_loss', duration: 30, calories: 550, equipment: ['none', 'jump_rope', 'heavy_bag'], rounds: [{type: 'work', text: 'Rope HIIT', time: 180}, {type: 'rest', time: 30}, {type: 'work', text: 'Burpee Bag Slams', time: 180}, {type: 'rest', time: 30}, {type: 'work', text: 'Rope HIIT', time: 180}, {type: 'rest', time: 30}, {type: 'work', text: 'Burpee Bag Slams', time: 180}]},
+            { id: 305, title: 'Pivots & Switches', goal: 'technique', duration: 35, calories: 350, equipment: ['none'], rounds: [{type: 'work', text: 'Front Foot Pivots', time: 180}, {type: 'rest', time: 45}, {type: 'work', text: 'Back Foot Pivots', time: 180}, {type: 'rest', time: 45}, {type: 'work', text: 'Switch Step Attack', time: 180}, {type: 'rest', time: 45}, {type: 'work', text: 'Off-Angle Counters', time: 180}] },
+            { id: 306, title: '5-Minute Grind', goal: 'cardio', duration: 30, calories: 600, equipment: ['heavy_bag'], rounds: [{type: 'work', text: '5-Minute High Volume', time: 300}, {type: 'rest', time: 60}, {type: 'work', text: '5-Minute High Volume', time: 300}, {type: 'rest', time: 60}, {type: 'work', text: '5-Minute High Volume', time: 300}] },
+            { id: 307, title: 'Barbell/DB Complex', goal: 'strength', duration: 30, calories: 450, equipment: ['dumbbells'], rounds: [{type: 'work', text: 'Clean & Press Circuit', time: 180}, {type: 'rest', time: 60}, {type: 'work', text: 'Weighted Plyo Jumps', time: 180}, {type: 'rest', time: 60}, {type: 'work', text: 'Rotational Med Ball Slams', time: 180}] },
+            { id: 308, title: 'Ironman Endurance', goal: 'weight_loss', duration: 40, calories: 700, equipment: ['jump_rope', 'heavy_bag', 'none'], rounds: [{type: 'work', text: 'Rope Endurance', time: 240}, {type: 'rest', time: 60}, {type: 'work', text: 'Bag Work Intervals', time: 240}, {type: 'rest', time: 60}, {type: 'work', text: 'Ground & Pound Drills', time: 180}, {type: 'rest', time: 60}, {type: 'work', text: 'All-Out Finish', time: 120}] },
+            
+            { id: 309, title: 'Defensive Flow & Attack', goal: 'technique', duration: 35, calories: 420, equipment: ['none'], rounds: [{type: 'work', text: '3-Hit Combo, Weave Out', time: 240}, {type: 'rest', time: 45}, {type: 'work', text: 'Pull, Roll, Re-Engage', time: 240}, {type: 'rest', time: 45}, {type: 'work', text: 'Angle Cuts & Countering', time: 180}] },
+            { id: 310, title: 'Power Endurance Circuit', goal: 'strength', duration: 30, calories: 500, equipment: ['dumbbells', 'heavy_bag'], rounds: [{type: 'work', text: 'DB Thrusters & Bag Flurry', time: 180}, {type: 'rest', time: 45}, {type: 'work', text: 'Weighted Lunges & Power Hooks', time: 180}, {type: 'rest', time: 45}, {type: 'work', text: 'Burpee Box Jumps (Simulated)', time: 180}] },
+            { id: 311, title: 'Max-Effort Ladder', goal: 'cardio', duration: 25, calories: 580, equipment: ['none'], rounds: [{type: 'work', text: '60s All-Out / 30s Rest', time: 180}, {type: 'rest', time: 30}, {type: 'work', text: 'Shadowbox Speed (Increasing Effort)', time: 180}, {type: 'rest', time: 30}, {type: 'work', text: '60s All-Out / 30s Rest', time: 180}] },
+            { id: 312, title: 'The 10-Round Gauntlet', goal: 'weight_loss', duration: 50, calories: 850, equipment: ['jump_rope', 'heavy_bag'], rounds: [{type: 'work', text: 'Rope HIIT & Footwork', time: 240}, {type: 'rest', time: 45}, {type: 'work', text: 'Bag Volume (Power/Speed mix)', time: 240}, {type: 'rest', time: 45}, {type: 'work', text: 'Rope HIIT & Footwork', time: 240}, {type: 'rest', time: 45}, {type: 'work', text: 'Bag Volume (Power/Speed mix)', time: 240}] },
+            { id: 313, title: 'The Body Snatcher', goal: 'technique', duration: 25, calories: 300, equipment: ['heavy_bag'], rounds: [{type: 'work', text: 'Head-Body-Head Combination', time: 180}, {type: 'rest', time: 60}, {type: 'work', text: 'Lower Level Attack Drills', time: 180}, {type: 'rest', time: 60}, {type: 'work', text: 'Freestyle Body Shot Practice', time: 180}] },
+            { id: 314, title: 'Extreme Rope Work', goal: 'cardio', duration: 35, calories: 750, equipment: ['jump_rope'], rounds: [{type: 'work', text: 'Double Under Practice', time: 180}, {type: 'rest', time: 30}, {type: 'work', text: 'High Speed Skip Intervals', time: 180}, {type: 'rest', time: 30}, {type: 'work', text: 'Cross-Over/Advanced Footwork', time: 180}, {type: 'rest', time: 30}, {type: 'work', text: 'High Speed Skip Intervals', time: 180}] }
+        ]
+    };
+
+    // State object to hold all user data
+    let state = {
+        profile: null,
+        activityLog: [],
+        settings: {
+            bestReactionTime: null,
+            voiceEnabled: false
+        }
+    };
+    
+    // --- UTILITY & HELPER FUNCTIONS ---
+    const getEl = (id) => document.getElementById(id);
+    const queryAll = (selector) => document.querySelectorAll(selector);
+
+    const saveState = () => localStorage.setItem('boxfit_state', JSON.stringify(state));
+    const loadState = () => {
+        const savedState = localStorage.getItem('boxfit_state');
+        if (savedState) { 
+            state = JSON.parse(savedState);
+            state.settings = state.settings || { bestReactionTime: null, voiceEnabled: false }; 
+            return true; 
+        }
+        return false;
+    };
+    
+    // Safer way to access profile data 
+    const getProfile = () => state.profile || { 
+        name: 'Fighter', 
+        level: 'beginner', 
+        goal: 'technique', 
+        equipment: ['none'] 
+    };
+
+    const formatTime = (seconds) => {
+        const minutes = Math.floor(seconds / 60);
+        const remainingSeconds = seconds % 60;
+        return `${String(minutes).padStart(2, '0')}:${String(remainingSeconds).padStart(2, '0')}`;
+    };
+
+    const formatRunTime = (seconds) => {
+        const h = Math.floor(seconds / 3600);
+        const m = Math.floor((seconds % 3600) / 60);
+        const s = seconds % 60;
+        return [h, m, s].map(v => String(v).padStart(2, '0')).join(':');
+    };
+
+    // Strict Timer Management
+    let activeIntervals = [];
+    let activeTimeouts = [];
+
+    const clearActiveTimers = () => {
+        activeIntervals.forEach(clearInterval);
+        activeTimeouts.forEach(clearTimeout);
+        activeIntervals = [];
+        activeTimeouts = [];
+    };
+
+    // --- SPEECH & SOUND ---
+    const speechSynth = window.speechSynthesis;
+    const speak = (text) => {
+        if (!state.settings.voiceEnabled || !speechSynth || !soundsReady) return;
+        speechSynth.cancel(); 
+        // Use 'Slipp' in the spoken text to force correct pronunciation of 'Slip'
+        const sanitizedText = text.toString().replace(/Slipp/g, 'Slip').replace(/(\d)-(\d)/g, '$1, $2'); 
+        const utterance = new SpeechSynthesisUtterance(sanitizedText);
+        utterance.rate = 1.1;
+        utterance.pitch = 1;
+        
+        utterance.onerror = (event) => {
+             console.error("Speech synthesis failed:", event.error);
+        };
+        speechSynth.speak(utterance);
+    };
+
+    let soundsReady = false;
+    const synth = new Tone.Synth().toDestination();
+    const bellSynth = new Tone.MetalSynth({ frequency: 200, envelope: { attack: 0.001, decay: 1.4, release: 0.2 }, harmonicity: 5.1, modulationIndex: 32, resonance: 4000, octaves: 1.5 }).toDestination();
+    
+    const playSound = (note, duration = "8n") => { 
+        if (soundsReady && Tone.context.state === 'running') synth.triggerAttackRelease(note, duration); 
+    };
+    const playBell = () => { 
+        if (soundsReady && Tone.context.state === 'running') bellSynth.triggerAttackRelease("C4", "1n"); 
+    };
+
+    // --- NAVIGATION ---
+    const screens = queryAll('.screen');
+    const navButtons = queryAll('.nav-button');
+    const bottomNavItems = queryAll('.bottom-nav .nav-item');
+
+    const showScreen = (screenId) => {
+        clearActiveTimers(); 
+        screens.forEach(screen => screen.classList.remove('active'));
+        getEl(screenId).classList.add('active');
+        bottomNavItems.forEach(item => item.classList.toggle('active', item.dataset.target === screenId));
+        
+        // Re-render data for the newly active screen
+        if (screenId === 'dashboard-screen') renderDashboard();
+        if (screenId === 'workouts-screen') renderWorkouts(queryAll('.filter-btn.active')[0]?.dataset.filter || 'all');
+        if (screenId === 'progress-screen') renderProgressLog();
+        if (screenId === 'profile-screen') renderProfile();
+        if (screenId === 'combo-generator-screen') generateCombo();
+        if (screenId === 'rope-flow-screen') resetRope(); 
+    };
+
+    navButtons.forEach(button => button.addEventListener('click', () => {
+        const targetScreen = button.dataset.target;
+        if (targetScreen) showScreen(targetScreen);
+    }));
+
+    // --- MODALS ---
+    const modals = queryAll('.modal-overlay');
+    const closeModalButtons = queryAll('.close-modal-btn');
+    
+    const showModal = (modalId) => getEl(modalId).classList.add('active');
+    const hideModals = () => modals.forEach(modal => modal.classList.remove('active'));
+
+    closeModalButtons.forEach(btn => btn.addEventListener('click', () => {
+        const target = btn.dataset.target;
+        hideModals();
+        if(target) showScreen(target);
+    }));
+    getEl('cancel-reset-btn').addEventListener('click', hideModals);
+
+
+    // --- UI RENDERING & DATA CALCULATION ---
+    let activityChart;
+
+    // Timezone-safe streak calculation
+    const calculateStreak = () => {
+        if (state.activityLog.length === 0) return 0;
+        
+        // Get unique YYYY-MM-DD strings from log
+        const activityDates = [...new Set(state.activityLog.map(log => log.date.substring(0, 10)))];
+        activityDates.sort((a, b) => b.localeCompare(a)); 
+
+        let streak = 0;
+        const today = new Date();
+        const todayString = today.toISOString().substring(0, 10);
+        
+        const getDateStringOffset = (offset) => {
+            const d = new Date(today);
+            d.setDate(today.getDate() - offset);
+            return d.toISOString().substring(0, 10);
+        };
+        
+        const latestLogDate = activityDates[0];
+        if (latestLogDate === todayString || latestLogDate === getDateStringOffset(1)) {
+            streak = 1;
+            for (let i = 0; i < activityDates.length - 1; i++) {
+                const currentDate = new Date(activityDates[i]);
+                const nextDate = new Date(activityDates[i + 1]);
+                const diffTime = currentDate - nextDate;
+                const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24)); 
+                if (diffDays === 1) {
+                    streak++;
+                } else {
+                    break;
+                }
+            }
+        }
+        return streak;
+    };
+    
+    const renderDashboard = () => {
+        const profile = getProfile();
+        if (!profile) return;
+        getEl('welcome-message').textContent = `Welcome Back, ${profile.name}!`;
+        const totalWorkouts = state.activityLog.filter(a => a.type === 'workout' || a.type === 'run' || a.type === 'rope').length;
+        const totalTime = state.activityLog.reduce((sum, a) => sum + a.duration, 0);
+        
+        getEl('streak-stat').textContent = calculateStreak(); 
+        getEl('workouts-stat').textContent = totalWorkouts;
+        getEl('time-stat').innerHTML = `${totalTime}<span class="text-base">m</span>`;
+        renderRecommendedWorkouts();
+        renderActivityChart();
+    };
+
+    const renderRecommendedWorkouts = () => {
+        const container = getEl('recommended-list');
+        const { level, goal, equipment } = getProfile();
+        const workoutsForLevel = workoutsData[level] || [];
+        const recommended = workoutsForLevel.find(w => w.goal === goal && w.equipment.some(e => equipment.includes(e)));
+        const fallback = workoutsForLevel.filter(w => w.equipment.some(e => equipment.includes(e))).slice(0, 3); 
+        const workoutsToShow = recommended ? [recommended, ...fallback.filter(w => w.id !== recommended.id)].slice(0, 2) : fallback.slice(0, 2);
+        
+        if (workoutsToShow.length === 0) {
+            container.innerHTML = `<p class="text-text-color-dark text-center">No recommended workouts available based on your settings.</p>`;
+            return;
+        }
+        container.innerHTML = workoutsToShow.map(workout => `
+            <div class="glass-card p-4 flex items-center justify-between cursor-pointer start-workout-btn" data-workout-id="${workout.id}" data-level="${level}">
+                <div><p class="font-bold">${workout.title}</p><p class="text-sm text-text-color-dark">${workout.duration} min • ${workout.goal}</p></div>
+                <button class="btn btn-primary !p-3 !rounded-full"><i class="fas fa-play"></i></button>
+            </div>`).join('');
+    };
+    
+    const renderActivityChart = () => {
+        const ctx = getEl('activity-chart').getContext('2d');
+        const labels = [];
+        const data = new Array(7).fill(0);
+        const today = new Date();
+        const dayMap = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+        for (let i = 6; i >= 0; i--) {
+            const date = new Date(today);
+            date.setDate(today.getDate() - i);
+            const dayString = date.toISOString().substring(0, 10);
+            labels.push(dayMap[date.getDay()]);
+
+            state.activityLog.forEach(log => {
+                if (log.date.substring(0, 10) === dayString) {
+                    data[6 - i] += log.duration;
+                }
+            });
+        }
+        
+        if (activityChart) activityChart.destroy();
+        activityChart = new Chart(ctx, {
+            type: 'bar',
+            data: { labels, datasets: [{ label: 'Minutes Trained', data, backgroundColor: 'rgba(229, 62, 62, 0.6)', borderColor: 'rgba(229, 62, 62, 1)', borderWidth: 1, borderRadius: 5 }] },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { backgroundColor: '#0A0A0A', titleColor: '#EDF2F7', bodyColor: '#A0AEC0' } }, scales: { y: { beginAtZero: true, grid: { color: 'rgba(255, 255, 255, 0.1)' }, ticks: { color: '#A0AEC0' } }, x: { grid: { display: false }, ticks: { color: '#A0AEC0' } } } }
+        });
+    };
+    
+    const renderWorkouts = (filter = 'all') => {
+        const container = getEl('workout-list');
+        const { level, equipment } = getProfile();
+        let workouts = workoutsData[level] || [];
+        if(filter !== 'all') workouts = workouts.filter(w => w.goal === filter);
+        workouts = workouts.filter(w => w.equipment.every(e => equipment.includes(e) || e === 'none'));
+        if(workouts.length === 0) { container.innerHTML = `<p class="text-text-color-dark text-center mt-8">No workouts found for your filter and equipment.</p>`; return; }
+        container.innerHTML = workouts.map(w => `
+             <div class="glass-card p-4 flex items-center justify-between cursor-pointer start-workout-btn" data-workout-id="${w.id}" data-level="${level}">
+                <div><p class="font-bold">${w.title}</p><p class="text-sm text-text-color-dark">${w.duration} min • ${w.calories} kcal</p></div>
+                 <button class="btn btn-primary !p-3 !rounded-full"><i class="fas fa-play"></i></button>
+            </div>`).join('');
+    };
+
+    const renderWorkoutFilters = () => {
+        const container = getEl('filter-container');
+        const filters = ['all', 'technique', 'cardio', 'strength', 'weight_loss'];
+        container.innerHTML = filters.map(f => `<button class="filter-btn ${f === 'all' ? 'active' : ''}" data-filter="${f}">${f.charAt(0).toUpperCase() + f.slice(1).replace('_', ' ')}</button>`).join('');
+    };
+
+    const renderProgressLog = () => {
+        const container = getEl('progress-log');
+        if (state.activityLog.length === 0) { container.innerHTML = `<p class="text-text-color-dark text-center mt-8">No activities logged yet.</p>`; return; }
+        container.innerHTML = state.activityLog.slice().reverse().map(a => `
+            <div class="glass-card p-4">
+                <div class="flex justify-between items-center">
+                    <div><p class="font-bold">${a.name}</p><p class="text-sm text-text-color-dark">${new Date(a.date).toLocaleDateString()}</p></div>
+                    <div class="text-right"><p class="font-bold">${a.duration} min</p><p class="text-sm text-text-color-dark">${a.calories} kcal</p></div>
+                </div>
+            </div>`).join('');
+    };
+
+    const renderProfile = () => {
+        const { name, level, goal, equipment } = getProfile();
+        getEl('profile-summary').innerHTML = `
+            <div class="flex justify-between"><span class="text-text-color-dark">Name:</span> <strong>${name}</strong></div>
+            <div class="flex justify-between"><span class="text-text-color-dark">Level:</span> <strong class="capitalize">${level}</strong></div>
+            <div class="flex justify-between"><span class="text-text-color-dark">Goal:</span> <strong class="capitalize">${goal.replace('_', ' ')}</strong></div>
+            <div class="flex justify-between"><span class="text-text-color-dark">Equipment:</span> <strong class="capitalize">${equipment.join(', ').replace(/_/g, ' ')}</strong></div>
+        `;
+        // Ensures the toggle switch UI reflects the saved state
+        getEl('voice-toggle').checked = !!state.settings.voiceEnabled; 
+    };
+
+    // --- INITIALIZATION & PROFILE SETUP ---
+    const initAppForUser = () => {
+        document.body.removeEventListener('click', initSound);
+        getEl('main-app').classList.remove('hidden');
+        getEl('welcome-screen').classList.remove('active');
+        getEl('profile-setup-screen').classList.remove('active');
+        renderDashboard(); renderWorkoutFilters(); renderWorkouts(); renderProgressLog(); renderProfile();
+        showScreen('dashboard-screen');
+    };
+
+    getEl('get-started-btn').addEventListener('click', () => showScreen('profile-setup-screen'));
+
+    let selectedEquipment = [];
+    const equipmentChoices = queryAll('#equipment-choices .choice-card');
+    
+    equipmentChoices.forEach(card => card.addEventListener('click', () => {
+        card.classList.toggle('selected');
+        const value = card.dataset.value;
+        if (card.classList.contains('selected')) { if (!selectedEquipment.includes(value)) selectedEquipment.push(value); } 
+        else { selectedEquipment = selectedEquipment.filter(item => item !== value); }
+    }));
+
+    getEl('finish-setup-btn').addEventListener('click', () => {
+        const name = getEl('name').value.trim(); 
+        const level = getEl('level').value;
+        const goal = getEl('goal').value;
+
+        // CRITICAL FIX: Explicitly check for empty strings
+        if (name === '' || level === '' || goal === '' || selectedEquipment.length === 0) {
+            getEl('error-message').textContent = 'Please fill out all fields and select your equipment.';
+            showModal('error-modal'); 
+            return; 
+        }
+        
+        state.profile = { name, level, goal, equipment: selectedEquipment };
+        state.activityLog = [];
+        state.settings = state.settings || { bestReactionTime: null, voiceEnabled: false };
+        saveState(); 
+        initAppForUser();
+    });
+    
+    // --- WORKOUT PLAYER LOGIC ---
+    let currentWorkout, currentRoundIndex, secondsRemaining;
+
+    const startWorkout = (workoutId, level) => {
+        currentWorkout = workoutsData[level].find(w => w.id == workoutId);
+        if (!currentWorkout) return;
+        currentRoundIndex = 0;
+        showScreen('workout-player-screen');
+        activeTimeouts.push(setTimeout(runNextRound, 500)); 
+    };
+
+    const runNextRound = () => {
+        clearActiveTimers(); 
+        if(currentRoundIndex >= currentWorkout.rounds.length) { finishWorkout(); return; }
+        
+        const round = currentWorkout.rounds[currentRoundIndex];
+        secondsRemaining = round.time;
+        getEl('player-title').textContent = currentWorkout.title;
+        getEl('player-round-status').textContent = `Round ${Math.ceil((currentRoundIndex + 1) / 2)} of ${Math.ceil(currentWorkout.rounds.length / 2)}`;
+        getEl('player-instruction-text').textContent = round.text;
+        const nextRound = currentWorkout.rounds[currentRoundIndex + 1];
+        getEl('player-next-up').textContent = nextRound ? `Next: ${nextRound.text}` : 'Last Round!';
+        speak(`${round.type}. ${round.text}`);
+        if(round.type === 'work') { playBell(); } else { playSound('C3'); }
+        
+        updateWorkoutTimerDisplay();
+        const workoutTimerInterval = setInterval(workoutTick, 1000);
+        activeIntervals.push(workoutTimerInterval); 
+    };
+
+    const workoutTick = () => {
+        secondsRemaining--;
+        updateWorkoutTimerDisplay();
+        if (secondsRemaining <= 3 && secondsRemaining > 0) {
+            playSound('C4');
+            speak(secondsRemaining);
+        }
+        if (secondsRemaining <= 0) { 
+            clearActiveTimers(); 
+            currentRoundIndex++; 
+            activeTimeouts.push(setTimeout(runNextRound, 1000));
+        }
+    };
+    
+    const updateWorkoutTimerDisplay = () => getEl('player-timer-display').textContent = formatTime(secondsRemaining);
+    
+    const finishWorkout = () => {
+        clearActiveTimers();
+        playBell();
+        speak("Workout complete!");
+        const activity = { type: 'workout', id: currentWorkout.id, name: currentWorkout.title, date: new Date().toISOString(), duration: currentWorkout.duration, calories: currentWorkout.calories };
+        state.activityLog.push(activity);
+        saveState();
+        getEl('workout-calories-burned').textContent = currentWorkout.calories;
+        showModal('finish-workout-modal');
+    };
+    
+    document.body.addEventListener('click', e => {
+        const target = e.target.closest('.start-workout-btn');
+        if (target) startWorkout(target.dataset.workoutId, target.dataset.level);
+    });
+
+    getEl('end-workout-btn').addEventListener('click', finishWorkout);
+
+    // --- RUNNER LOGIC ---
+    let runSeconds = 0, runDistance = 0, runCalories = 0, isRunning = false;
+    const startStopRunBtn = getEl('start-stop-run-btn'), endRunBtn = getEl('end-run-btn');
+    
+    // Runner Simulation Constants 
+    const SIM_PACE_MIN_PER_KM = 5.5; 
+    const SIM_CALORIES_PER_KM = 60; 
+
+    const runTick = () => {
+        runSeconds++;
+        const distancePerSecond = 1 / (SIM_PACE_MIN_PER_KM * 60); 
+        runDistance += distancePerSecond; 
+        runCalories = Math.round(runDistance * SIM_CALORIES_PER_KM);
+        updateRunUI();
+    };
+
+    const updateRunUI = () => {
+        getEl('run-timer-display').textContent = formatRunTime(runSeconds);
+        getEl('run-distance').textContent = runDistance.toFixed(2);
+        getEl('run-calories').textContent = runCalories;
+        if(runDistance > 0) getEl('run-pace').textContent = formatTime(Math.round(runSeconds / runDistance)).replace(':', "'") + '"';
+    };
+    
+    const resetRun = () => {
+        runSeconds = 0; runDistance = 0; runCalories = 0;
+        updateRunUI(); getEl('run-pace').textContent = "--'--";
+    };
+
+    startStopRunBtn.addEventListener('click', () => {
+        if (!isRunning) {
+            // START/RESUME
+            const runTimerInterval = setInterval(runTick, 1000);
+            activeIntervals.push(runTimerInterval); 
+            startStopRunBtn.innerHTML = `<i class="fas fa-pause"></i>Pause Run`;
+            endRunBtn.classList.remove('hidden'); startStopRunBtn.classList.remove('col-span-2');
+            getEl('run-timer-display').classList.add('running');
+            speak("Run started");
+        } else {
+            // PAUSE
+            clearActiveTimers(); 
+            startStopRunBtn.innerHTML = `<i class="fas fa-play"></i>Resume Run`;
+            getEl('run-timer-display').classList.remove('running');
+            speak("Run paused");
+        }
+        isRunning = !isRunning;
+    });
+
+    endRunBtn.addEventListener('click', () => {
+        clearActiveTimers(); 
+        isRunning = false;
+        speak("Run complete");
+        if (runSeconds > 0) {
+            const activity = { type: 'run', name: 'Road Work', date: new Date().toISOString(), duration: Math.round(runSeconds / 60), calories: runCalories };
+            state.activityLog.push(activity); saveState();
+            getEl('summary-run-time').textContent = formatRunTime(runSeconds);
+            getEl('summary-run-distance').textContent = `${runDistance.toFixed(2)} km`;
+            getEl('summary-run-pace').textContent = getEl('run-pace').textContent;
+            getEl('summary-run-calories').textContent = `${runCalories} kcal`;
+            showModal('run-summary-modal'); 
+        }
+        startStopRunBtn.innerHTML = `<i class="fas fa-play"></i>Start Run`;
+        endRunBtn.classList.add('hidden'); startStopRunBtn.classList.add('col-span-2');
+        getEl('run-timer-display').classList.remove('running'); resetRun();
+    });
+
+    // --- ROPE FLOW LOGIC ---
+    let ropeSeconds = 0, ropeJumps = 0, ropeCalories = 0, isRoping = false;
+    const startStopRopeBtn = getEl('start-stop-rope-btn'), endRopeBtn = getEl('end-rope-btn');
+
+    const SIM_ROPE_JUMPS_PER_SEC = 2; // Average 120 JPM (2 jumps/sec)
+    const SIM_ROPE_CALORIES_PER_SEC = 0.1; // Estimated burn rate (6 kcal/min)
+
+    const ropeTick = () => {
+        ropeSeconds++;
+        ropeJumps += SIM_ROPE_JUMPS_PER_SEC;
+        ropeCalories += SIM_ROPE_CALORIES_PER_SEC;
+        updateRopeUI();
+    };
+
+    const updateRopeUI = () => {
+        getEl('rope-timer-display').textContent = formatTime(ropeSeconds); 
+        getEl('rope-jumps').textContent = Math.round(ropeJumps);
+        getEl('rope-calories').textContent = Math.round(ropeCalories);
+        
+        const minutes = ropeSeconds / 60;
+        const jpm = minutes > 0 ? Math.round(ropeJumps / minutes) : 0;
+        getEl('rope-jpm').textContent = jpm > 0 ? jpm : '--';
+    };
+
+    const resetRope = () => {
+        ropeSeconds = 0; ropeJumps = 0; ropeCalories = 0;
+        updateRopeUI();
+        getEl('rope-jpm').textContent = '--';
+        startStopRopeBtn.innerHTML = `<i class="fas fa-play"></i>Start Session`;
+        endRopeBtn.classList.add('hidden'); 
+        startStopRopeBtn.classList.add('col-span-2'); 
+        isRoping = false;
+    };
+    
+    startStopRopeBtn.addEventListener('click', () => {
+        if (!isRoping) {
+            // START/RESUME
+            const ropeTimerInterval = setInterval(ropeTick, 1000);
+            activeIntervals.push(ropeTimerInterval); 
+            startStopRopeBtn.innerHTML = `<i class="fas fa-pause"></i>Pause Session`;
+            endRopeBtn.classList.remove('hidden'); startStopRopeBtn.classList.remove('col-span-2');
+            speak("Rope session started");
+        } else {
+            // PAUSE
+            clearActiveTimers(); 
+            startStopRopeBtn.innerHTML = `<i class="fas fa-play"></i>Resume Session`;
+            speak("Rope session paused");
+        }
+        isRoping = !isRoping;
+    });
+
+    endRopeBtn.addEventListener('click', () => {
+        clearActiveTimers(); 
+        isRoping = false;
+        speak("Session complete");
+
+        if (ropeSeconds > 0) {
+            const avgJPM = Math.round(ropeJumps / (ropeSeconds / 60));
+            
+            const activity = { type: 'rope', name: 'Rope Flow', date: new Date().toISOString(), duration: Math.round(ropeSeconds / 60), calories: Math.round(ropeCalories) };
+            state.activityLog.push(activity); 
+            saveState();
+
+            getEl('summary-rope-time').textContent = formatTime(ropeSeconds);
+            getEl('summary-rope-jumps').textContent = Math.round(ropeJumps);
+            getEl('summary-rope-jpm').textContent = avgJPM;
+            getEl('summary-rope-calories').textContent = `${Math.round(ropeCalories)} kcal`;
+            
+            showModal('rope-summary-modal'); 
+        }
+        resetRope();
+    });
+
+    // --- WORKOUTS SCREEN FILTERING ---
+    getEl('filter-container').addEventListener('click', e => {
+        if (e.target.classList.contains('filter-btn')) {
+            queryAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+            e.target.classList.add('active'); renderWorkouts(e.target.dataset.filter);
+        }
+    });
+
+    // --- DRILLS LOGIC ---
+    const punches = { beginner: ['1', '2', 'Jab', 'Cross'], intermediate: ['1', '2', '3', '4', 'Slip R', 'Slip L'], advanced: ['1', '2', '3', '4', '5', '6', 'Weave', 'Pull', 'Roll'] };
+    const iqCues = { beginner: ['Jab', 'Cross', '1-2'], intermediate: ['Jab', 'Cross', 'Hook', 'Slip', '1-2', '2-3'], advanced: ['1-2-3', 'Slip-2', 'Pull-2', 'Jab-Cross-Hook', 'Weave', 'Roll'] };
+    
+    // Combo Generator
+    getEl('combo-length').addEventListener('change', generateCombo);
+
+    const generateCombo = () => {
+        const selectedLength = parseInt(getEl('combo-length').value) || 2;
+        const { level } = getProfile();
+        const availablePunches = punches[level];
+        let combo = [];
+        for (let i = 0; i < selectedLength; i++) {
+             // Use the fixed 'Slipp' spelling in the data used for speaking
+             const punch = availablePunches[Math.floor(Math.random() * availablePunches.length)].replace('Slip', 'Slipp'); 
+             combo.push(punch);
+        }
+        
+        // Display uses the clean spelling
+        const comboDisplayed = combo.map(p => `<span>${p.replace('Slipp', 'Slip')}</span>`).join('');
+        getEl('combo-display').innerHTML = comboDisplayed;
+        
+        // Speak uses the fixed spelling
+        speak(combo.join(', '));
+    };
+
+    getEl('change-combo-btn').addEventListener('click', generateCombo);
+    getEl('start-combo-timer-btn').addEventListener('click', (e) => {
+        clearActiveTimers();
+        let comboSeconds = 180;
+        getEl('combo-timer-display').textContent = formatTime(comboSeconds);
+        getEl('combo-timer-display').classList.remove('hidden');
+        e.target.disabled = true;
+        getEl('change-combo-btn').disabled = true;
+        playBell();
+        
+        const comboTimerInterval = setInterval(() => {
+            comboSeconds--;
+            getEl('combo-timer-display').textContent = formatTime(comboSeconds);
+            if (comboSeconds <= 0) {
+                clearActiveTimers();
+                playBell();
+                getEl('combo-timer-display').classList.add('hidden');
+                e.target.disabled = false;
+                getEl('change-combo-btn').disabled = false;
+            }
+        }, 1000);
+        activeIntervals.push(comboTimerInterval); 
+    });
+
+    // Fight IQ
+    getEl('start-fight-iq-btn').addEventListener('click', (e) => {
+        clearActiveTimers();
+        e.target.disabled = true;
+        let fightIqSeconds = 180;
+        let fightIqScore = 0;
+        getEl('fight-iq-score').textContent = fightIqScore;
+        getEl('fight-iq-timer').textContent = formatTime(fightIqSeconds);
+        
+        const showNextFightIqCue = () => {
+            const { level } = getProfile();
+            const cue = iqCues[level][Math.floor(Math.random() * iqCues[level].length)];
+            getEl('fight-iq-cue-display').textContent = cue;
+            speak(cue);
+            fightIqScore++;
+            getEl('fight-iq-score').textContent = fightIqScore;
+        };
+
+        playBell();
+        activeTimeouts.push(setTimeout(showNextFightIqCue, 1000));
+        
+        const fightIqCueInterval = setInterval(showNextFightIqCue, 3500);
+        const fightIqTimerInterval = setInterval(() => {
+            fightIqSeconds--;
+            getEl('fight-iq-timer').textContent = formatTime(fightIqSeconds);
+            
+            if (fightIqSeconds === 10) speak("Ten seconds left!");
+            
+            if (fightIqSeconds <= 0) {
+                clearActiveTimers();
+                playBell();
+                getEl('fight-iq-cue-display').textContent = "Round Over!";
+                speak("Round Over");
+                e.target.disabled = false;
+            }
+        }, 1000);
+        activeIntervals.push(fightIqCueInterval, fightIqTimerInterval); 
+    });
+
+    // --- Verbal Sparring Drill ---
+    const verbalCues = { 
+        beginner: ['Jab', 'Cross', 'Slipp Left', 'Block Right'], 
+        intermediate: ['1-2', 'Slipp-2', 'Weave', 'Hook', 'Roll'], 
+        advanced: ['Pull-Counter', 'Angle Off', 'Lead Hook', 'Weave-2-3'] 
+    };
+
+    const verbalTimerDisplay = getEl('verbal-timer');
+    const verbalCueDisplay = getEl('verbal-cue-display');
+    const startVerbalBtn = getEl('start-verbal-btn');
+    const cuesCountDisplay = getEl('verbal-cues-count');
+
+    getEl('start-verbal-btn').addEventListener('click', (e) => {
+        clearActiveTimers();
+        e.target.disabled = true;
+        let verbalSeconds = 180; // 3-minute round
+        let cuesExecuted = 0;
+        
+        cuesCountDisplay.textContent = cuesExecuted;
+        verbalTimerDisplay.textContent = formatTime(verbalSeconds);
+        
+        const showNextVerbalCue = () => {
+            const { level } = getProfile();
+            const cueSpoken = verbalCues[level][Math.floor(Math.random() * verbalCues[level].length)];
+            
+            // Fix: Display 'Slip', but send 'Slipp' to speak function for correct pronunciation
+            const cueDisplayed = cueSpoken.replace(/Slipp/g, 'Slip'); 
+
+            verbalCueDisplay.textContent = cueDisplayed; 
+            speak(cueSpoken); // Speaks the fixed pronunciation
+            
+            cuesExecuted++;
+            cuesCountDisplay.textContent = cuesExecuted;
+        };
+
+        playBell();
+        
+        activeTimeouts.push(setTimeout(showNextVerbalCue, 1000));
+        
+        const verbalCueInterval = setInterval(showNextVerbalCue, 3000); 
+        
+        const verbalTimerInterval = setInterval(() => {
+            verbalSeconds--;
+            verbalTimerDisplay.textContent = formatTime(verbalSeconds);
+            
+            if (verbalSeconds === 10) speak("Ten seconds left!");
+            
+            if (verbalSeconds <= 0) {
+                clearActiveTimers();
+                playBell();
+                verbalCueDisplay.textContent = `Time! Total Cues: ${cuesExecuted}`;
+                speak("Time! Round Over.");
+                e.target.disabled = false;
+                
+                state.activityLog.push({ 
+                    type: 'drill', 
+                    name: 'Verbal Sparring', 
+                    date: new Date().toISOString(), 
+                    duration: 3, 
+                    calories: Math.round(cuesExecuted * 0.5) 
+                });
+                saveState();
+                renderProgressLog(); 
+            }
+        }, 1000);
+        activeIntervals.push(verbalCueInterval, verbalTimerInterval);
+    });
+
+    // --- END Verbal Sparring Drill ---
+    
+    // --- PROFILE/SETTINGS ---
+    getEl('voice-toggle').addEventListener('change', (e) => {
+        state.settings.voiceEnabled = e.target.checked;
+        saveState();
+        if (state.settings.voiceEnabled) {
+            if (!soundsReady) initSound();
+            activeTimeouts.push(setTimeout(() => speak("Voice enabled"), 100));
+        }
+    });
+
+    getEl('reset-data-btn').addEventListener('click', () => {
+        showModal('confirm-modal');
+    });
+
+    getEl('confirm-reset-btn').addEventListener('click', () => {
+        // Clear the state from localStorage
+        localStorage.removeItem('boxfit_state');
+        
+        // Clear all session storage (just in case)
+        sessionStorage.clear();
+        
+        // Force reload the page, which will now run initialize() and find no state.
+        window.location.reload(true); 
+    });
+
+    // --- APP ENTRY POINT ---
+    function initSound() {
+        if (soundsReady) return;
+        Tone.start(); 
+        soundsReady = true; 
+        console.log("Audio context started. Tone.js ready.");
+        document.body.removeEventListener('click', initSound);
+    }
+
+    const initialize = () => {
+        // Explicitly check for saved profile object after loading state
+        const savedProfileExists = loadState() && state.profile !== null;
+
+        if (savedProfileExists) {
+            initAppForUser();
+        } else {
+            // If loadState failed OR loaded state.profile is null:
+            // Ensure a clean state and start from the welcome/setup screen.
+            state.profile = null;
+            state.activityLog = [];
+            selectedEquipment = []; 
+            showScreen('welcome-screen');
+        }
+        document.body.addEventListener('click', initSound);
+        resetRope(); 
+        resetRun();
+        
+        // Initial call to generate a combo immediately for UX
+        if (getEl('combo-generator-screen').classList.contains('active')) {
+            generateCombo();
+        }
+    };
+
+    initialize();
+});
+</script>
+</body>
+</html>
