@@ -406,8 +406,8 @@
         <div id="error-modal" class="modal-overlay"><div class="modal-content glass-card p-6 rounded-lg shadow-xl w-11/12 max-w-sm text-center"><i class="fas fa-exclamation-triangle text-5xl text-yellow-400 mb-4"></i><h2 class="font-anton text-2xl tracking-wide mb-2">Hold Up</h2><p id="error-message" class="text-text-color-dark mb-4">Please fill out all fields.</p><button class="close-modal-btn btn btn-primary w-full">OK</button></div></div>
         <div id="finish-workout-modal" class="modal-overlay"><div class="modal-content glass-card p-6 rounded-lg shadow-xl w-11/12 max-w-sm text-center"><i class="fas fa-award text-5xl text-primary-color mb-4"></i><h2 class="font-anton text-2xl tracking-wide mb-2">Workout Complete!</h2><p class="text-text-color-dark mb-4">You burned an est. <span id="workout-calories-burned" class="font-bold text-white">0</span> calories.</p><button class="close-modal-btn btn btn-primary w-full" data-target="dashboard-screen">Back to Dashboard</button></div></div>
         <div id="run-summary-modal" class="modal-overlay"><div class="modal-content glass-card p-6 rounded-lg shadow-xl w-11/12 max-w-sm text-center"><i class="fas fa-road text-5xl text-primary-color mb-4"></i><h2 class="font-anton text-2xl tracking-wide mb-2">Run Complete!</h2><div class="grid grid-cols-2 gap-4 my-4 text-left"><p class="text-text-color-dark">Time</p><p id="summary-run-time" class="font-bold text-right"></p><p class="text-text-color-dark">Distance</p><p id="summary-run-distance" class="font-bold text-right"></p><p class="text-text-color-dark">Avg. Pace</p><p id="summary-run-pace" class="font-bold text-right"></p><p class="text-text-color-dark">Calories</p><p id="summary-run-calories" class="font-bold text-right"></p></div><button id="close-run-summary-btn" class="close-modal-btn btn btn-primary w-full" data-target="dashboard-screen">Done</button></div></div>
-        <div id="rope-summary-modal" class="modal-overlay"><div class="modal-content glass-card p-6 rounded-lg shadow-xl w-11/12 max-w-sm text-center"><i class="fas fa-skiing text-5xl text-primary-color mb-4"></i><h2 class="font-anton text-2xl tracking-wide mb-2">Rope Session Complete!</h2><div class="grid grid-cols-2 gap-4 my-4 text-left"><p class="text-text-color-dark">Time</p><p id="summary-rope-time" class="font-bold text-right"></p><p class="text-text-color-dark">Total Jumps</p><p id="summary-rope-jumps" class="font-bold text-right"></p><p class="text-text-color-dark">Avg. JPM</p><p id="summary-rope-jpm" class="font-bold text-right"></p><p class="text-text-color-dark">Calories</p><p id="summary-rope-calories" class="font-bold text-right"></p></div><button id="close-rope-summary-btn" class="close-modal-btn btn btn-primary w-full" data-target="dashboard-screen">Done</button></div></div>
-        <div id="confirm-modal" class="modal-overlay"><div class="modal-content glass-card p-6 rounded-lg shadow-xl w-11/12 max-w-sm text-center"><i class="fas fa-trash-alt text-5xl text-primary-color mb-4"></i><h2 class="font-anton text-2xl tracking-wide mb-2">Are you sure?</h2><p id="confirm-message" class="text-text-color-dark mb-6">This action cannot be undone.</p><div class="grid grid-cols-2 gap-4"><button id="cancel-reset-btn" class="btn btn-secondary">Cancel</button><button id="confirm-reset-btn" class="btn btn-primary">Reset Data</button></div></div></div>
+        <div id="rope-summary-modal" class="modal-overlay"><div class="modal-content glass-card p-6 rounded-lg shadow-xl w-11/12 max-w-sm text-center"><i class="fas fa-skiing text-5xl text-primary-color mb-4"></i><h2 classs="font-anton text-2xl tracking-wide mb-2">Rope Session Complete!</h2><div class="grid grid-cols-2 gap-4 my-4 text-left"><p class="text-text-color-dark">Time</p><p id="summary-rope-time" class="font-bold text-right"></p><p class="text-text-color-dark">Total Jumps</p><p id="summary-rope-jumps" class="font-bold text-right"></p><p class="text-text-color-dark">Avg. JPM</p><p id="summary-rope-jpm" class="font-bold text-right"></p><p class="text-text-color-dark">Calories</p><p id="summary-rope-calories" class="font-bold text-right"></p></div><button id="close-rope-summary-btn" class="close-modal-btn btn btn-primary w-full" data-target="dashboard-screen">Done</button></div></div>
+        <div id="confirm-modal" class="modal-overlay"><div class="modal-content glass-card p-6 rounded-lg shadow-xl w-11/12 max-w-sm text-center"><i class="fas fa-trash-alt text-5xl text-primary-color mb-4"></i><h2 classs="font-anton text-2xl tracking-wide mb-2">Are you sure?</h2><p id="confirm-message" class="text-text-color-dark mb-6">This action cannot be undone.</p><div class="grid grid-cols-2 gap-4"><button id="cancel-reset-btn" class="btn btn-secondary">Cancel</button><button id="confirm-reset-btn" class="btn btn-primary">Reset Data</button></div></div></div>
     </div>
 
     <script>
@@ -567,7 +567,6 @@
 
     // --- NAVIGATION ---
     const screens = queryAll('.screen');
-    const navButtons = queryAll('.nav-button');
     const bottomNavItems = queryAll('.bottom-nav .nav-item');
 
     const showScreen = (screenId) => {
@@ -585,24 +584,11 @@
         if (screenId === 'rope-flow-screen') resetRope(); 
     };
 
-    navButtons.forEach(button => button.addEventListener('click', () => {
-        const targetScreen = button.dataset.target;
-        if (targetScreen) showScreen(targetScreen);
-    }));
-
     // --- MODALS ---
     const modals = queryAll('.modal-overlay');
-    const closeModalButtons = queryAll('.close-modal-btn');
     
     const showModal = (modalId) => getEl(modalId).classList.add('active');
     const hideModals = () => modals.forEach(modal => modal.classList.remove('active'));
-
-    closeModalButtons.forEach(btn => btn.addEventListener('click', () => {
-        const target = btn.dataset.target;
-        hideModals();
-        if(target) showScreen(target);
-    }));
-    getEl('cancel-reset-btn').addEventListener('click', hideModals);
 
 
     // --- UI RENDERING & DATA CALCULATION ---
@@ -765,88 +751,18 @@
         getEl('main-app').classList.remove('hidden');
         getEl('welcome-screen').classList.remove('active');
         getEl('profile-setup-screen').classList.remove('active');
-        renderDashboard(); renderWorkoutFilters(); renderWorkouts(); renderProgressLog(); renderProfile();
+        
+        // Attach all event listeners for the main app
+        attachMainAppListeners();
+        
+        renderDashboard(); 
+        renderWorkoutFilters(); 
+        renderWorkouts(); 
+        renderProgressLog(); 
+        renderProfile();
         showScreen('dashboard-screen');
     };
-
-    getEl('get-started-btn').addEventListener('click', () => showScreen('profile-setup-screen'));
-
-    let selectedEquipment = [];
-    const equipmentChoices = queryAll('#equipment-choices .choice-card');
     
-    equipmentChoices.forEach(card => card.addEventListener('click', () => {
-        card.classList.toggle('selected');
-        const value = card.dataset.value;
-        if (card.classList.contains('selected')) { if (!selectedEquipment.includes(value)) selectedEquipment.push(value); } 
-        else { selectedEquipment = selectedEquipment.filter(item => item !== value); }
-    }));
-
-    getEl('finish-setup-btn').addEventListener('click', () => {
-        const name = getEl('name').value.trim(); 
-        const level = getEl('level').value;
-        const goal = getEl('goal').value;
-
-        // CRITICAL FIX: Explicitly check for empty strings
-        if (name === '' || level === '' || goal === '' || selectedEquipment.length === 0) {
-            getEl('error-message').textContent = 'Please fill out all fields and select your equipment.';
-            showModal('error-modal'); 
-            return; 
-        }
-        
-        state.profile = { name, level, goal, equipment: selectedEquipment };
-        state.activityLog = [];
-        state.settings = state.settings || { bestReactionTime: null, voiceEnabled: false };
-        saveState(); 
-        initAppForUser();
-    });
-    
-    // --- NEW: PROFILE UPDATE LOGIC (Updates profile without losing history) ---
-    
-    // Handler for selecting/deselecting equipment on the Profile screen
-    document.body.addEventListener('click', (e) => {
-        const card = e.target.closest('#profile-equipment-choices .choice-card');
-        if (card) {
-            card.classList.toggle('selected');
-            const value = card.dataset.value;
-            // Update the separate state variable used for profile editing
-            if (card.classList.contains('selected')) { 
-                if (!selectedEquipmentProfile.includes(value)) selectedEquipmentProfile.push(value); 
-            } else { 
-                selectedEquipmentProfile = selectedEquipmentProfile.filter(item => item !== value); 
-            }
-        }
-    });
-
-    // Handler for the Update Profile button
-    getEl('update-profile-btn').addEventListener('click', () => {
-        const name = getEl('profile-name-input').value.trim();
-        const level = getEl('profile-level-select').value;
-        const goal = getEl('profile-goal-select').value;
-
-        // Validation
-        if (name === '' || selectedEquipmentProfile.length === 0) {
-            getEl('error-message').textContent = 'Name and at least one piece of equipment are required.';
-            showModal('error-modal'); 
-            return;
-        }
-
-        // Update state and save
-        state.profile.name = name;
-        state.profile.level = level;
-        state.profile.goal = goal;
-        state.profile.equipment = selectedEquipmentProfile;
-        
-        saveState(); 
-
-        // Update dashboard and notify user
-        renderDashboard();
-        showScreen('dashboard-screen');
-        alert('Profile Updated Successfully!');
-    });
-
-    // --- END NEW PROFILE UPDATE LOGIC ---
-
-
     // --- WORKOUT PLAYER LOGIC ---
     let currentWorkout, currentRoundIndex, secondsRemaining;
 
@@ -920,16 +836,8 @@
         showModal('finish-workout-modal');
     };
     
-    document.body.addEventListener('click', e => {
-        const target = e.target.closest('.start-workout-btn');
-        if (target) startWorkout(target.dataset.workoutId, target.dataset.level);
-    });
-
-    getEl('end-workout-btn').addEventListener('click', finishWorkout);
-
     // --- RUNNER LOGIC ---
     let runSeconds = 0, runDistance = 0, runCalories = 0, isRunning = false;
-    const startStopRunBtn = getEl('start-stop-run-btn'), endRunBtn = getEl('end-run-btn');
     
     // Runner Simulation Constants 
     const SIM_PACE_MIN_PER_KM = 5.5; 
@@ -955,46 +863,8 @@
         updateRunUI(); getEl('run-pace').textContent = "--'--";
     };
 
-    startStopRunBtn.addEventListener('click', () => {
-        if (!isRunning) {
-            // START/RESUME
-            const runTimerInterval = setInterval(runTick, 1000);
-            activeIntervals.push(runTimerInterval); 
-            startStopRunBtn.innerHTML = `<i class="fas fa-pause"></i>Pause Run`;
-            endRunBtn.classList.remove('hidden'); startStopRunBtn.classList.remove('col-span-2');
-            getEl('run-timer-display').classList.add('running');
-            speak("Run started");
-        } else {
-            // PAUSE
-            clearActiveTimers(); 
-            startStopRunBtn.innerHTML = `<i class="fas fa-play"></i>Resume Run`;
-            getEl('run-timer-display').classList.remove('running');
-            speak("Run paused");
-        }
-        isRunning = !isRunning;
-    });
-
-    endRunBtn.addEventListener('click', () => {
-        clearActiveTimers(); 
-        isRunning = false;
-        speak("Run complete");
-        if (runSeconds > 0) {
-            const activity = { type: 'run', name: 'Road Work', date: new Date().toISOString(), duration: Math.round(runSeconds / 60), calories: runCalories };
-            state.activityLog.push(activity); saveState();
-            getEl('summary-run-time').textContent = formatRunTime(runSeconds);
-            getEl('summary-run-distance').textContent = `${runDistance.toFixed(2)} km`;
-            getEl('summary-run-pace').textContent = getEl('run-pace').textContent;
-            getEl('summary-run-calories').textContent = `${runCalories} kcal`;
-            showModal('run-summary-modal'); 
-        }
-        startStopRunBtn.innerHTML = `<i class="fas fa-play"></i>Start Run`;
-        endRunBtn.classList.add('hidden'); startStopRunBtn.classList.add('col-span-2');
-        getEl('run-timer-display').classList.remove('running'); resetRun();
-    });
-
     // --- ROPE FLOW LOGIC ---
     let ropeSeconds = 0, ropeJumps = 0, ropeCalories = 0, isRoping = false;
-    const startStopRopeBtn = getEl('start-stop-rope-btn'), endRopeBtn = getEl('end-rope-btn');
 
     const SIM_ROPE_JUMPS_PER_SEC = 2; // Average 120 JPM (2 jumps/sec)
     const SIM_ROPE_CALORIES_PER_SEC = 0.1; // Estimated burn rate (6 kcal/min)
@@ -1020,69 +890,21 @@
         ropeSeconds = 0; ropeJumps = 0; ropeCalories = 0;
         updateRopeUI();
         getEl('rope-jpm').textContent = '--';
-        startStopRopeBtn.innerHTML = `<i class="fas fa-play"></i>Start Session`;
-        endRopeBtn.classList.add('hidden'); 
-        startStopRopeBtn.classList.add('col-span-2'); 
+        getEl('start-stop-rope-btn').innerHTML = `<i class="fas fa-play"></i>Start Session`;
+        getEl('end-rope-btn').classList.add('hidden'); 
+        getEl('start-stop-rope-btn').classList.add('col-span-2'); 
         isRoping = false;
     };
     
-    startStopRopeBtn.addEventListener('click', () => {
-        if (!isRoping) {
-            // START/RESUME
-            const ropeTimerInterval = setInterval(ropeTick, 1000);
-            activeIntervals.push(ropeTimerInterval); 
-            startStopRopeBtn.innerHTML = `<i class="fas fa-pause"></i>Pause Session`;
-            endRopeBtn.classList.remove('hidden'); startStopRopeBtn.classList.remove('col-span-2');
-            speak("Rope session started");
-        } else {
-            // PAUSE
-            clearActiveTimers(); 
-            startStopRopeBtn.innerHTML = `<i class="fas fa-play"></i>Resume Session`;
-            speak("Rope session paused");
-        }
-        isRoping = !isRoping;
-    });
-
-    endRopeBtn.addEventListener('click', () => {
-        clearActiveTimers(); 
-        isRoping = false;
-        speak("Session complete");
-
-        if (ropeSeconds > 0) {
-            const avgJPM = Math.round(ropeJumps / (ropeSeconds / 60));
-            
-            const activity = { type: 'rope', name: 'Rope Flow', date: new Date().toISOString(), duration: Math.round(ropeSeconds / 60), calories: Math.round(ropeCalories) };
-            state.activityLog.push(activity); 
-            saveState();
-
-            getEl('summary-rope-time').textContent = formatTime(ropeSeconds);
-            getEl('summary-rope-jumps').textContent = Math.round(ropeJumps);
-            getEl('summary-rope-jpm').textContent = avgJPM;
-            getEl('summary-rope-calories').textContent = `${Math.round(ropeCalories)} kcal`;
-            
-            showModal('rope-summary-modal'); 
-        }
-        resetRope();
-    });
-
-    // --- WORKOUTS SCREEN FILTERING ---
-    getEl('filter-container').addEventListener('click', e => {
-        if (e.target.classList.contains('filter-btn')) {
-            queryAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
-            e.target.classList.add('active'); renderWorkouts(e.target.dataset.filter);
-        }
-    });
 
     // --- DRILLS LOGIC ---
-    const punches = { beginner: ['1', '2', 'Jab', 'Cross'], intermediate: ['1', '2', '3', '4', 'Slip R', 'Slip L'], advanced: ['1', '2', '3', '4', '5', '6', 'Weave', 'Pull', 'Roll'] };
-    const iqCues = { beginner: ['Jab', 'Cross', '1-2'], intermediate: ['Jab', 'Cross', 'Hook', 'Slip', '1-2', '2-3'], advanced: ['1-2-3', 'Slip-2', 'Pull-2', 'Jab-Cross-Hook', 'Weave', 'Roll'] };
+    const punches = { beginner: ['1', '2', 'Jab', 'Cross'], intermediate: ['1', '2', '3', '4', 'Slipp R', 'Slipp L'], advanced: ['1', '2', '3', '4', '5', '6', 'Weave', 'Pull', 'Roll'] };
+    const iqCues = { beginner: ['Jab', 'Cross', '1-2'], intermediate: ['Jab', 'Cross', 'Hook', 'Slipp', '1-2', '2-3'], advanced: ['1-2-3', 'Slipp-2', 'Pull-2', 'Jab-Cross-Hook', 'Weave', 'Roll'] };
     
     // Combo Generator
-    getEl('combo-length').addEventListener('change', generateCombo);
-
     const generateCombo = () => {
         const selectedLength = parseInt(getEl('combo-length').value) || 2;
-        let { level } = getProfile();
+        let level = getProfile().level;
         
         // Safety Check 1: Ensure level exists in punch data
         if (!punches[level]) {
@@ -1093,8 +915,7 @@
         const availablePunches = punches[level];
         let combo = [];
         for (let i = 0; i < selectedLength; i++) {
-             // Use the fixed 'Slipp' spelling in the data used for speaking
-             const punch = availablePunches[Math.floor(Math.random() * availablePunches.length)].replace('Slip', 'Slipp'); 
+             const punch = availablePunches[Math.floor(Math.random() * availablePunches.length)];
              combo.push(punch);
         }
         
@@ -1102,79 +923,10 @@
         const comboDisplayed = combo.map(p => `<span>${p.replace('Slipp', 'Slip')}</span>`).join('');
         getEl('combo-display').innerHTML = comboDisplayed;
         
-        // Speak uses the fixed spelling
+        // Speak uses the (potentially) modified spelling
         speak(combo.join(', '));
     };
 
-    getEl('change-combo-btn').addEventListener('click', generateCombo);
-    getEl('start-combo-timer-btn').addEventListener('click', (e) => {
-        clearActiveTimers();
-        let comboSeconds = 180;
-        getEl('combo-timer-display').textContent = formatTime(comboSeconds);
-        getEl('combo-timer-display').classList.remove('hidden');
-        e.target.disabled = true;
-        getEl('change-combo-btn').disabled = true;
-        playBell();
-        
-        const comboTimerInterval = setInterval(() => {
-            comboSeconds--;
-            getEl('combo-timer-display').textContent = formatTime(comboSeconds);
-            if (comboSeconds <= 0) {
-                clearActiveTimers();
-                playBell();
-                getEl('combo-timer-display').classList.add('hidden');
-                e.target.disabled = false;
-                getEl('change-combo-btn').disabled = false;
-            }
-        }, 1000);
-        activeIntervals.push(comboTimerInterval); 
-    });
-
-    // Fight IQ
-    getEl('start-fight-iq-btn').addEventListener('click', (e) => {
-        clearActiveTimers();
-        e.target.disabled = true;
-        let fightIqSeconds = 180;
-        let fightIqScore = 0;
-        getEl('fight-iq-score').textContent = fightIqScore;
-        getEl('fight-iq-timer').textContent = formatTime(fightIqSeconds);
-        
-        const showNextFightIqCue = () => {
-            let { level } = getProfile();
-            
-            // Safety Check 2: Ensure level exists in cue data
-            if (!iqCues[level]) {
-                console.warn(`Level '${level}' not found for Fight IQ. Defaulting to 'beginner'.`);
-                level = 'beginner';
-            }
-
-            const cue = iqCues[level][Math.floor(Math.random() * iqCues[level].length)];
-            getEl('fight-iq-cue-display').textContent = cue;
-            speak(cue);
-            fightIqScore++;
-            getEl('fight-iq-score').textContent = fightIqScore;
-        };
-
-        playBell();
-        activeTimeouts.push(setTimeout(showNextFightIqCue, 1000));
-        
-        const fightIqCueInterval = setInterval(showNextFightIqCue, 3500);
-        const fightIqTimerInterval = setInterval(() => {
-            fightIqSeconds--;
-            getEl('fight-iq-timer').textContent = formatTime(fightIqSeconds);
-            
-            if (fightIqSeconds === 10) speak("Ten seconds left!");
-            
-            if (fightIqSeconds <= 0) {
-                clearActiveTimers();
-                playBell();
-                getEl('fight-iq-cue-display').textContent = "Round Over!";
-                speak("Round Over");
-                e.target.disabled = false;
-            }
-        }, 1000);
-        activeIntervals.push(fightIqCueInterval, fightIqTimerInterval); 
-    });
 
     // --- Verbal Sparring Drill ---
     const verbalCues = { 
@@ -1183,106 +935,288 @@
         advanced: ['Pull-Counter', 'Angle Off', 'Lead Hook', 'Weave-2-3'] 
     };
 
-    const verbalTimerDisplay = getEl('verbal-timer');
-    const verbalCueDisplay = getEl('verbal-cue-display');
-    const startVerbalBtn = getEl('start-verbal-btn');
-    const cuesCountDisplay = getEl('verbal-cues-count');
+    // --- APP ENTRY POINT ---
+    
+    // ⭐ FIX: This function now attaches all listeners *after* the main app is loaded
+    function attachMainAppListeners() {
+        // Navigation
+        queryAll('.nav-button').forEach(button => button.addEventListener('click', () => {
+            const targetScreen = button.dataset.target;
+            if (targetScreen) showScreen(targetScreen);
+        }));
 
-    getEl('start-verbal-btn').addEventListener('click', (e) => {
-        clearActiveTimers();
-        e.target.disabled = true;
-        let verbalSeconds = 180; // 3-minute round
-        let cuesExecuted = 0;
+        // Modals
+        queryAll('.close-modal-btn').forEach(btn => btn.addEventListener('click', () => {
+            const target = btn.dataset.target;
+            hideModals();
+            if(target) showScreen(target);
+        }));
+        getEl('cancel-reset-btn').addEventListener('click', hideModals);
+
+        // Workout Start
+        document.body.addEventListener('click', e => {
+            const target = e.target.closest('.start-workout-btn');
+            if (target) startWorkout(target.dataset.workoutId, target.dataset.level);
+        });
+        getEl('end-workout-btn').addEventListener('click', finishWorkout);
         
-        cuesCountDisplay.textContent = cuesExecuted;
-        verbalTimerDisplay.textContent = formatTime(verbalSeconds);
-        
-        const showNextVerbalCue = () => {
-            let { level } = getProfile();
-            
-            // Safety Check 3: Ensure level exists in cue data
-            if (!verbalCues[level]) {
-                console.warn(`Level '${level}' not found for Verbal Sparring. Defaulting to 'beginner'.`);
-                level = 'beginner';
+        // Runner
+        getEl('start-stop-run-btn').addEventListener('click', () => {
+            if (!isRunning) {
+                const runTimerInterval = setInterval(runTick, 1000);
+                activeIntervals.push(runTimerInterval); 
+                getEl('start-stop-run-btn').innerHTML = `<i class="fas fa-pause"></i>Pause Run`;
+                getEl('end-run-btn').classList.remove('hidden'); getEl('start-stop-run-btn').classList.remove('col-span-2');
+                getEl('run-timer-display').classList.add('running');
+                speak("Run started");
+            } else {
+                clearActiveTimers(); 
+                getEl('start-stop-run-btn').innerHTML = `<i class="fas fa-play"></i>Resume Run`;
+                getEl('run-timer-display').classList.remove('running');
+                speak("Run paused");
             }
-            
-            const cueSpoken = verbalCues[level][Math.floor(Math.random() * verbalCues[level].length)];
-            
-            // Display 'Slip', but send 'Slipp' to speak function for correct pronunciation
-            const cueDisplayed = cueSpoken.replace(/Slipp/g, 'Slip'); 
+            isRunning = !isRunning;
+        });
+        getEl('end-run-btn').addEventListener('click', () => {
+            clearActiveTimers(); 
+            isRunning = false;
+            speak("Run complete");
+            if (runSeconds > 0) {
+                const activity = { type: 'run', name: 'Road Work', date: new Date().toISOString(), duration: Math.round(runSeconds / 60), calories: runCalories };
+                state.activityLog.push(activity); saveState();
+                getEl('summary-run-time').textContent = formatRunTime(runSeconds);
+                getEl('summary-run-distance').textContent = `${runDistance.toFixed(2)} km`;
+                getEl('summary-run-pace').textContent = getEl('run-pace').textContent;
+                getEl('summary-run-calories').textContent = `${runCalories} kcal`;
+                showModal('run-summary-modal'); 
+            }
+            getEl('start-stop-run-btn').innerHTML = `<i class="fas fa-play"></i>Start Run`;
+            getEl('end-run-btn').classList.add('hidden'); getEl('start-stop-run-btn').classList.add('col-span-2');
+            getEl('run-timer-display').classList.remove('running'); resetRun();
+        });
+        
+        // Rope Flow
+        getEl('start-stop-rope-btn').addEventListener('click', () => {
+            if (!isRoping) {
+                const ropeTimerInterval = setInterval(ropeTick, 1000);
+                activeIntervals.push(ropeTimerInterval); 
+                getEl('start-stop-rope-btn').innerHTML = `<i class="fas fa-pause"></i>Pause Session`;
+                getEl('end-rope-btn').classList.remove('hidden'); getEl('start-stop-rope-btn').classList.remove('col-span-2');
+                speak("Rope session started");
+            } else {
+                clearActiveTimers(); 
+                getEl('start-stop-rope-btn').innerHTML = `<i class="fas fa-play"></i>Resume Session`;
+                speak("Rope session paused");
+            }
+            isRoping = !isRoping;
+        });
+        getEl('end-rope-btn').addEventListener('click', () => {
+            clearActiveTimers(); 
+            isRoping = false;
+            speak("Session complete");
+            if (ropeSeconds > 0) {
+                const avgJPM = Math.round(ropeJumps / (ropeSeconds / 60));
+                const activity = { type: 'rope', name: 'Rope Flow', date: new Date().toISOString(), duration: Math.round(ropeSeconds / 60), calories: Math.round(ropeCalories) };
+                state.activityLog.push(activity); 
+                saveState();
+                getEl('summary-rope-time').textContent = formatTime(ropeSeconds);
+                getEl('summary-rope-jumps').textContent = Math.round(ropeJumps);
+                getEl('summary-rope-jpm').textContent = avgJPM;
+                getEl('summary-rope-calories').textContent = `${Math.round(ropeCalories)} kcal`;
+                showModal('rope-summary-modal'); 
+            }
+            resetRope();
+        });
 
-            verbalCueDisplay.textContent = cueDisplayed; 
-            speak(cueSpoken); // Speaks the fixed pronunciation
+        // Workout Filters
+        getEl('filter-container').addEventListener('click', e => {
+            if (e.target.classList.contains('filter-btn')) {
+                queryAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+                e.target.classList.add('active'); renderWorkouts(e.target.dataset.filter);
+            }
+        });
+
+        // Drills
+        getEl('combo-length').addEventListener('change', generateCombo);
+        getEl('change-combo-btn').addEventListener('click', generateCombo);
+        getEl('start-combo-timer-btn').addEventListener('click', (e) => {
+            clearActiveTimers();
+            let comboSeconds = 180;
+            const comboTimerDisplay = getEl('combo-timer-display'); // Find element on click
+            comboTimerDisplay.textContent = formatTime(comboSeconds);
+            comboTimerDisplay.classList.remove('hidden');
+            e.target.disabled = true;
+            getEl('change-combo-btn').disabled = true;
+            playBell();
+            const comboTimerInterval = setInterval(() => {
+                comboSeconds--;
+                comboTimerDisplay.textContent = formatTime(comboSeconds);
+                if (comboSeconds <= 0) {
+                    clearActiveTimers();
+                    playBell();
+                    comboTimerDisplay.classList.add('hidden');
+                    e.target.disabled = false;
+                    getEl('change-combo-btn').disabled = false;
+                }
+            }, 1000);
+            activeIntervals.push(comboTimerInterval); 
+        });
+
+        getEl('start-fight-iq-btn').addEventListener('click', (e) => {
+            clearActiveTimers();
+            e.target.disabled = true;
+            let fightIqSeconds = 180;
+            let fightIqScore = 0;
+            const fightIqScoreDisplay = getEl('fight-iq-score'); // Find elements on click
+            const fightIqTimerDisplay = getEl('fight-iq-timer');
+            const fightIqCueDisplay = getEl('fight-iq-cue-display');
             
-            cuesExecuted++;
+            fightIqScoreDisplay.textContent = fightIqScore;
+            fightIqTimerDisplay.textContent = formatTime(fightIqSeconds);
+            
+            const showNextFightIqCue = () => {
+                let level = getProfile().level;
+                if (!iqCues[level]) level = 'beginner'; // Safety check
+                const cue = iqCues[level][Math.floor(Math.random() * iqCues[level].length)];
+                fightIqCueDisplay.textContent = cue;
+                speak(cue);
+                fightIqScore++;
+                fightIqScoreDisplay.textContent = fightIqScore;
+            };
+
+            playBell();
+            activeTimeouts.push(setTimeout(showNextFightIqCue, 1000));
+            const fightIqCueInterval = setInterval(showNextFightIqCue, 3500);
+            const fightIqTimerInterval = setInterval(() => {
+                fightIqSeconds--;
+                fightIqTimerDisplay.textContent = formatTime(fightIqSeconds);
+                if (fightIqSeconds === 10) speak("Ten seconds left!");
+                if (fightIqSeconds <= 0) {
+                    clearActiveTimers();
+                    playBell();
+                    fightIqCueDisplay.textContent = "Round Over!";
+                    speak("Round Over");
+                    e.target.disabled = false;
+                }
+            }, 1000);
+            activeIntervals.push(fightIqCueInterval, fightIqTimerInterval); 
+        });
+
+        getEl('start-verbal-btn').addEventListener('click', (e) => {
+            clearActiveTimers();
+            e.target.disabled = true;
+            let verbalSeconds = 180; 
+            let cuesExecuted = 0;
+            
+            // ⭐ FIX: Find elements *inside* the click handler
+            const cuesCountDisplay = getEl('verbal-cues-count');
+            const verbalTimerDisplay = getEl('verbal-timer');
+            const verbalCueDisplay = getEl('verbal-cue-display');
+            
             cuesCountDisplay.textContent = cuesExecuted;
-        };
-
-        playBell();
-        
-        activeTimeouts.push(setTimeout(showNextVerbalCue, 1000));
-        
-        const verbalCueInterval = setInterval(showNextVerbalCue, 3000); 
-        
-        const verbalTimerInterval = setInterval(() => {
-            verbalSeconds--;
             verbalTimerDisplay.textContent = formatTime(verbalSeconds);
             
-            if (verbalSeconds === 10) speak("Ten seconds left!");
+            const showNextVerbalCue = () => {
+                let level = getProfile().level;
+                if (!verbalCues[level]) level = 'beginner'; // Safety check
+                const cueSpoken = verbalCues[level][Math.floor(Math.random() * verbalCues[level].length)];
+                const cueDisplayed = cueSpoken.replace(/Slipp/g, 'Slip'); 
+                verbalCueDisplay.textContent = cueDisplayed; 
+                speak(cueSpoken);
+                cuesExecuted++;
+                cuesCountDisplay.textContent = cuesExecuted;
+            };
+
+            playBell();
             
-            if (verbalSeconds <= 0) {
-                clearActiveTimers();
-                playBell();
-                verbalCueDisplay.textContent = `Time! Total Cues: ${cuesExecuted}`;
-                speak("Time! Round Over.");
-                e.target.disabled = false;
+            activeTimeouts.push(setTimeout(showNextVerbalCue, 1000));
+            
+            const verbalCueInterval = setInterval(showNextVerbalCue, 3000); 
+            
+            const verbalTimerInterval = setInterval(() => {
+                verbalSeconds--;
+                verbalTimerDisplay.textContent = formatTime(verbalSeconds);
                 
-                state.activityLog.push({ 
-                    type: 'drill', 
-                    name: 'Verbal Sparring', 
-                    date: new Date().toISOString(), 
-                    duration: 3, 
-                    calories: Math.round(cuesExecuted * 0.5) 
-                });
-                saveState();
-                renderProgressLog(); 
+                if (verbalSeconds === 10) speak("Ten seconds left!");
+                
+                if (verbalSeconds <= 0) {
+                    clearActiveTimers();
+                    playBell();
+                    verbalCueDisplay.textContent = `Time! Total Cues: ${cuesExecuted}`;
+                    speak("Time! Round Over.");
+                    e.target.disabled = false;
+                    
+                    state.activityLog.push({ 
+                        type: 'drill', 
+                        name: 'Verbal Sparring', 
+                        date: new Date().toISOString(), 
+                        duration: 3, 
+                        calories: Math.round(cuesExecuted * 0.5) 
+                    });
+                    saveState();
+                    renderProgressLog(); 
+                }
+            }, 1000);
+            activeIntervals.push(verbalCueInterval, verbalTimerInterval);
+        });
+
+        // Profile / Settings
+        document.body.addEventListener('click', (e) => {
+            const card = e.target.closest('#profile-equipment-choices .choice-card');
+            if (card) {
+                card.classList.toggle('selected');
+                const value = card.dataset.value;
+                if (card.classList.contains('selected')) { 
+                    if (!selectedEquipmentProfile.includes(value)) selectedEquipmentProfile.push(value); 
+                } else { 
+                    selectedEquipmentProfile = selectedEquipmentProfile.filter(item => item !== value); 
+                }
             }
-        }, 1000);
-        activeIntervals.push(verbalCueInterval, verbalTimerInterval);
-    });
+        });
 
-    // --- END Verbal Sparring Drill ---
-    
-    // --- PROFILE/SETTINGS ---
-    getEl('voice-toggle').addEventListener('change', (e) => {
-        state.settings.voiceEnabled = e.target.checked;
-        saveState();
-        if (state.settings.voiceEnabled) {
-            if (!soundsReady) initSound();
-            activeTimeouts.push(setTimeout(() => speak("Voice enabled"), 100));
-        }
-    });
+        getEl('update-profile-btn').addEventListener('click', () => {
+            const name = getEl('profile-name-input').value.trim();
+            const level = getEl('profile-level-select').value;
+            const goal = getEl('profile-goal-select').value;
 
-    getEl('reset-data-btn').addEventListener('click', () => {
-        showModal('confirm-modal');
-    });
-
-    getEl('confirm-reset-btn').addEventListener('click', () => {
-        // Clear the state from localStorage
-        localStorage.removeItem('boxfit_state');
+            if (name === '' || selectedEquipmentProfile.length === 0) {
+                getEl('error-message').textContent = 'Name and at least one piece of equipment are required.';
+                showModal('error-modal'); 
+                return;
+            }
+            state.profile.name = name;
+            state.profile.level = level;
+            state.profile.goal = goal;
+            state.profile.equipment = selectedEquipmentProfile;
+            saveState(); 
+            renderDashboard();
+            showScreen('dashboard-screen');
+            alert('Profile Updated Successfully!');
+        });
         
-        // Clear all session storage (just in case)
-        sessionStorage.clear();
-        
-        // Force reload the page, which will now run initialize() and find no state.
-        window.location.reload(true); 
-    });
+        getEl('voice-toggle').addEventListener('change', (e) => {
+            state.settings.voiceEnabled = e.target.checked;
+            saveState();
+            if (state.settings.voiceEnabled) {
+                if (!soundsReady) initSound();
+                activeTimeouts.push(setTimeout(() => speak("Voice enabled"), 100));
+            }
+        });
 
-    // --- APP ENTRY POINT ---
+        getEl('reset-data-btn').addEventListener('click', () => {
+            showModal('confirm-modal');
+        });
+
+        getEl('confirm-reset-btn').addEventListener('click', () => {
+            localStorage.removeItem('boxfit_state');
+            sessionStorage.clear();
+            window.location.reload(true); 
+        });
+    }
+
     function initSound() {
         if (soundsReady) return;
         
-        // Check if Tone.js has started and if the context state is suspended
         if (Tone.context.state !== 'running') {
             Tone.start().then(() => {
                 soundsReady = true; 
@@ -1293,43 +1227,56 @@
              console.log("Audio context already running.");
         }
         
-        // Once initialized, add a handler to resume if suspended (key mobile fix!)
         document.body.addEventListener('click', resumeAudioContext, { once: true }); 
         document.body.removeEventListener('click', initSound);
     }
 
-    // New function to resume audio after suspension (key mobile fix!)
-    const resumeAudioContext = () => {
-        if (Tone.context.state === 'suspended') {
-            Tone.context.resume().then(() => {
-                console.log("Audio context resumed on user interaction.");
-            });
-        }
-        // Re-attach the handler since we used { once: true } before
-        document.body.addEventListener('click', resumeAudioContext);
-    };
-
     const initialize = () => {
-        // Explicitly check for saved profile object after loading state
-        const savedProfileExists = loadState() && state.profile !== null;
+        // Attach listeners only for the setup screens
+        getEl('get-started-btn').addEventListener('click', () => showScreen('profile-setup-screen'));
+        
+        let selectedEquipment = [];
+        const equipmentChoices = queryAll('#equipment-choices .choice-card');
+        equipmentChoices.forEach(card => card.addEventListener('click', () => {
+            card.classList.toggle('selected');
+            const value = card.dataset.value;
+            if (card.classList.contains('selected')) { if (!selectedEquipment.includes(value)) selectedEquipment.push(value); } 
+            else { selectedEquipment = selectedEquipment.filter(item => item !== value); }
+        }));
 
+        getEl('finish-setup-btn').addEventListener('click', () => {
+            const name = getEl('name').value.trim(); 
+            const level = getEl('level').value;
+            const goal = getEl('goal').value;
+            if (name === '' || level === '' || goal === '' || selectedEquipment.length === 0) {
+                getEl('error-message').textContent = 'Please fill out all fields and select your equipment.';
+                showModal('error-modal'); 
+                return; 
+            }
+            state.profile = { name, level, goal, equipment: selectedEquipment };
+            state.activityLog = [];
+            state.settings = state.settings || { bestReactionTime: null, voiceEnabled: false };
+            saveState(); 
+            initAppForUser();
+        });
+
+        // Check if a profile exists
+        const savedProfileExists = loadState() && state.profile !== null;
         if (savedProfileExists) {
             initAppForUser();
         } else {
-            // If loadState failed OR loaded state.profile is null:
-            // Ensure a clean state and start from the welcome/setup screen.
+            // No profile found, show the welcome screen.
             state.profile = null;
             state.activityLog = [];
             selectedEquipment = []; 
             showScreen('welcome-screen');
         }
-        document.body.addEventListener('click', initSound);
-        resetRope(); 
-        resetRun();
         
-        // Initial call to generate a combo immediately for UX
-        if (getEl('combo-generator-screen').classList.contains('active')) {
-            generateCombo();
+        document.body.addEventListener('click', initSound);
+        // We only reset these if the main app is visible, which initAppForUser will handle
+        if (savedProfileExists) {
+            resetRope(); 
+            resetRun();
         }
     };
 
